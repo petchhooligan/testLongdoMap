@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>แผนที่มาร์คจุดพร้อมข้อมูล | Longdo Map + Firebase</title>
+    <title>แผนที่มาร์คจุดพร้อมข้อมูล</title>
     <style type="text/css">
         * {
             margin: 0;
@@ -357,7 +357,7 @@
                 <div class="crosshair-center"></div>
             </div>
             <div class="status" id="status">
-                กำลังเชื่อมต่อ Firebase...
+                กำลังเชื่อมต่อ Database...
             </div>
         </div>
 
@@ -396,7 +396,7 @@
 
             <div class="btn-group">
                 <button type="button" class="btn-secondary" onclick="loadMarkersFromFirebase()">
-                    🔄 โหลดข้อมูลจาก Firebase
+                    🔄 โหลดข้อมูล
                 </button>
                 <button type="button" class="btn-secondary" onclick="clearAllMarkers()">
                     🗑️ ลบทั้งหมด
@@ -449,7 +449,7 @@
         // Update status when Firebase is ready
         window.addEventListener('load', function() {
             setTimeout(function() {
-                updateStatus('✅ Firebase พร้อมใช้งาน - เลื่อนแผนที่และเพิ่มหมุด');
+                updateStatus('✅ Database พร้อมใช้งาน - เลื่อนแผนที่และเพิ่มหมุด');
                 
                 // Auto-load markers on startup
                 loadMarkersFromFirebase();
@@ -565,7 +565,7 @@
 
                 updateMarkersList();
                 clearForm();
-                updateStatus('✅ บันทึก "' + name + '" ใน Firebase สำเร็จ!');
+                updateStatus('✅ บันทึก "' + name + '" ใน Database สำเร็จ!');
 
                 // Reset button
                 addBtn.textContent = originalText;
@@ -584,7 +584,7 @@
 
         async function loadMarkersFromFirebase() {
             try {
-                updateStatus('🔄 กำลังโหลดข้อมูลจาก Firebase...');
+                updateStatus('🔄 กำลังโหลดข้อมูลจาก Database...');
                 
                 // Clear existing markers
                 markers.forEach(function(markerData) {
@@ -625,7 +625,7 @@
                 });
 
                 updateMarkersList();
-                updateStatus('✅ โหลดข้อมูล ' + markers.length + ' จุดจาก Firebase สำเร็จ!');
+                updateStatus('✅ โหลดข้อมูล ' + markers.length + ' จุดจาก Database สำเร็จ!');
 
             } catch (error) {
                 console.error("Error loading documents: ", error);
@@ -667,9 +667,9 @@
         }
 
         async function deleteMarkerFromFirebase(docId, index) {
-            if (confirm('ต้องการลบหมุด "' + markers[index].name + '" จาก Firebase หรือไม่?')) {
+            if (confirm('ต้องการลบหมุด "' + markers[index].name + '" จาก Database หรือไม่?')) {
                 try {
-                    updateStatus('🗑️ กำลังลบข้อมูลจาก Firebase...');
+                    updateStatus('🗑️ กำลังลบข้อมูลจาก Database...');
                     
                     // Delete from Firestore
                     await window.deleteDoc(window.doc(window.db, "markers", docId));
@@ -681,7 +681,7 @@
                     var deletedMarker = markers.splice(index, 1)[0];
                     
                     updateMarkersList();
-                    updateStatus('✅ ลบ "' + deletedMarker.name + '" จาก Firebase สำเร็จ!');
+                    updateStatus('✅ ลบ "' + deletedMarker.name + '" จาก Database สำเร็จ!');
                     
                 } catch (error) {
                     console.error("Error deleting document: ", error);
@@ -695,7 +695,7 @@
                 updateStatus('ไม่มีหมุดให้ลบ');
                 return;
             }
-            if (confirm('ต้องการลบหมุดทั้งหมด ' + markers.length + ' อัน จากแผนที่และ Firebase หรือไม่?')) {
+            if (confirm('ต้องการลบหมุดทั้งหมด ' + markers.length + ' อัน จากแผนที่และ Database หรือไม่?')) {
                 try {
                     // Clear from map only (not Firebase)
                     markers.forEach(function(markerData) {
@@ -703,7 +703,7 @@
                     });
                     markers = [];
                     updateMarkersList();
-                    updateStatus('✅ ล้างหมุดจากแผนที่แล้ว (ข้อมูลใน Firebase ยังอยู่)');
+                    updateStatus('✅ ล้างหมุดจากแผนที่แล้ว (ข้อมูลใน Database ยังอยู่)');
                 } catch (error) {
                     updateStatus('❌ เกิดข้อผิดพลาดในการลบหมุด');
                 }
