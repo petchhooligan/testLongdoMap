@@ -484,6 +484,8 @@
         var markers = [];
         var currentLat = 13.736717;
         var currentLon = 100.523186;
+        var selectedLat = null;
+        var selectedLon = null;
 
         function init() {
             try {
@@ -540,10 +542,22 @@
             addMarkerWithData();
         });
 
-        function createMarker(lat, lon, name, address, active) {
+        function createMarker(lat, lon, name, address, active, capacity, markerId, markerIndex) {
+            let detail = '';
+            if (address) detail += `📍 ${address}<br>`;
+            detail += `🌍 ${lat.toFixed(6)}, ${lon.toFixed(6)}<br>`;
+            if (capacity) detail += `👥 รองรับ ${capacity.toLocaleString()} คน<br>`;
+            // เพิ่มปุ่มลบและแก้ไขในป๊อปอัพ
+            if (typeof markerId !== 'undefined' && typeof markerIndex !== 'undefined') {
+                detail += `
+                    <button onclick="editMarkerFromPopup('${markerId}', ${markerIndex})" style="margin-top:8px;margin-right:8px;background:#3b82f6;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">✏️ แก้ไข</button>
+                    <button onclick="deleteMarkerFromPopup('${markerId}', ${markerIndex})" style="margin-top:8px;background:#ef4444;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">🗑️ ลบหมุดนี้</button>
+                `;
+            }
+
             const markerOptions = {
                 title: name,
-                detail: address || 'ไม่มีที่อยู่'
+                detail: detail
             };
             if (active) {
                 markerOptions.icon = {
@@ -589,7 +603,7 @@
                 const docRef = await window.addDoc(window.collection(window.db, "markers"), markerData);
 
                 // Add marker to map
-                var marker = createMarker(currentLat, currentLon, name, address, false);
+                var marker = createMarker(currentLat, currentLon, name, address, false, markerData.capacity, markerData.id, markers.length);
 
                 map.Overlays.add(marker);
 
@@ -633,7 +647,10 @@
                         data.lon,
                         data.name,
                         data.address,
-                        data.active
+                        data.active,
+                        data.capacity,
+                        doc.id,
+                        markers.length // index ปัจจุบัน
                     );
                     map.Overlays.add(marker);
 
@@ -659,6 +676,7 @@
             }
         }
 
+        // เพิ่มปุ่มแก้ไขใน card ด้านขวา
         function updateMarkersList() {
             var markersList = document.getElementById('markersList');
             var markerCount = document.getElementById('markerCount');
@@ -677,7 +695,10 @@
                         <div>
                             <div class="marker-name">${markerData.name}</div>
                         </div>
-                        <button class="btn-delete" onclick="deleteMarkerFromFirebase('${markerData.id}', ${index})">🗑️</button>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn-delete" onclick="editMarkerFromCard('${markerData.id}', ${index})" style="background:#3b82f6;">✏️</button>
+                            <button class="btn-delete" onclick="deleteMarkerFromFirebase('${markerData.id}', ${index})">🗑️</button>
+                        </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
                         <label class="switch">
@@ -699,61 +720,204 @@
             markersList.innerHTML = html;
         }
 
-        async function toggleActive(docId, index, isActive) {
-            try {
-                await window.updateDoc(window.doc(window.db, "markers", docId), { active: isActive });
-                markers[index].active = isActive;
-
-                // เปลี่ยน icon บนแผนที่
-                map.Overlays.remove(markers[index].marker);
-                markers[index].marker = createMarker(
-                    markers[index].lat,
-                    markers[index].lon,
-                    markers[index].name,
-                    markers[index].address,
-                    isActive
-                );
-                map.Overlays.add(markers[index].marker);
-
-                updateMarkersList();
-                updateStatus(`🔄 เปลี่ยนสถานะหมุด "${markers[index].name}" เป็น${isActive ? 'เปิด' : 'ปิด'}`);
-            } catch (error) {
-                updateStatus('❌ เปลี่ยนสถานะไม่สำเร็จ: ' + error.message);
-            }
+        // ฟังก์ชันเปิด modal แก้ไข (ใช้ window.prompt แบบง่าย)
+        function editMarkerFromPopup(id, index) {
+            openEditMarkerModal(id, index);
+            map.InfoWindow.close();
+        }
+        function editMarkerFromCard(id, index) {
+            openEditMarkerModal(id, index);
         }
 
-        async function deleteMarkerFromFirebase(docId, index) {
-            if (confirm('ต้องการลบหมุด "' + markers[index].name + '" จาก Database หรือไม่?')) {
-                try {
-                    updateStatus('🗑️ กำลังลบข้อมูลจาก Database...');
-                    await window.deleteDoc(window.doc(window.db, "markers", docId));
-                    map.Overlays.remove(markers[index].marker);
-                    var deletedMarker = markers.splice(index, 1)[0];
-                    updateMarkersList();
-                    updateStatus('✅ ลบ "' + deletedMarker.name + '" จาก Database สำเร็จ!');
-                } catch (error) {
-                    updateStatus('❌ เกิดข้อผิดพลาดในการลบข้อมูล: ' + error.message);
+        // Modal HTML
+        function createEditModalHTML(marker, index) {
+            return `
+            <div id="editMarkerModalBg" style="position:fixed;z-index:99999;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+                <div style="background:#fff;padding:32px 24px;border-radius:16px;min-width:320px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,0.18);position:relative;">
+                    <h2 style="font-size:20px;font-weight:700;margin-bottom:18px;">✏️ แก้ไขหมุด</h2>
+                    <form id="editMarkerForm">
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">ชื่อสถานที่ *</label>
+                            <input type="text" id="editName" value="${marker.name}" required style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">ที่อยู่</label>
+                            <textarea id="editAddress" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">${marker.address || ''}</textarea>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">จำนวนคนที่รองรับได้</label>
+                            <input type="number" id="editCapacity" min="1" value="${marker.capacity ? marker.capacity : ''}" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">ตำแหน่งพิกัด</label>
+                            <div style="display:flex;gap:8px;margin-bottom:8px;">
+                                <input type="number" id="editLat" step="any" value="${marker.lat}" required style="flex:1;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;" placeholder="ละติจูด">
+                                <input type="number" id="editLon" step="any" value="${marker.lon}" required style="flex:1;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;" placeholder="ลองจิจูด">
+                            </div>
+                            <button type="button" id="btnSelectNewPosition" style="background:#f59e42;color:#fff;padding:8px 12px;border:none;border-radius:6px;font-weight:600;cursor:pointer;">📍 มาร์คตำแหน่งใหม่</button>
+                            <span id="selectingPositionHint" style="display:none;color:#f59e42;font-size:13px;margin-left:8px;">กำลังเลือกตำแหน่งใหม่...</span>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <div style="width:100%;height:220px;position:relative;border-radius:10px;overflow:hidden;border:1.5px solid #e5e7eb;">
+                                <div id="editMap" style="width:100%;height:100%;"></div>
+                                <div class="center-crosshair" style="pointer-events:none;">
+                                    <div class="crosshair-h"></div>
+                                    <div class="crosshair-v"></div>
+                                    <div class="crosshair-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:10px;margin-top:18px;">
+                            <button type="submit" style="flex:1;background:#059669;color:#fff;padding:10px 0;border:none;border-radius:8px;font-weight:600;font-size:16px;cursor:pointer;">💾 บันทึก</button>
+                            <button type="button" onclick="closeEditMarkerModal()" style="flex:1;background:#e5e7eb;color:#374151;padding:10px 0;border:none;border-radius:8px;font-weight:600;font-size:16px;cursor:pointer;">ยกเลิก</button>
+                        </div>
+                    </form>
+                    <button onclick="closeEditMarkerModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#9ca3af;">×</button>
+                </div>
+            </div>
+            `;
+        }
+
+        // ปรับ openEditMarkerModal ให้เปิด modal เลือกตำแหน่งใหม่แบบแยกหน้าต่าง
+        function openEditMarkerModal(id, index) {
+            editingMarkerIndex = index;
+            editingMarkerModalDiv = document.createElement('div');
+            editingMarkerModalDiv.innerHTML = createEditModalHTML(markers[index], index);
+            document.body.appendChild(editingMarkerModalDiv);
+
+            setTimeout(function() {
+                let editLatInput = document.getElementById('editLat');
+                let editLonInput = document.getElementById('editLon');
+                // แปลง lat/lon ให้เป็นตัวเลขเสมอ
+                let lat = parseFloat(markers[index].lat);
+                let lon = parseFloat(markers[index].lon);
+
+                window.editMapObj = new longdo.Map({
+                    placeholder: document.getElementById('editMap'),
+                    language: 'th'
+                });
+                // กำหนดตำแหน่งกึ่งกลางเป็นพิกัดหมุดที่จะแก้ไข
+                window.editMapObj.location({ lat: lat, lon: lon });
+                window.editMapObj.zoom(16);
+                // บังคับ set location อีกครั้งหลัง zoom เพื่อความชัวร์
+                setTimeout(function() {
+                    window.editMapObj.location({ lat: lat, lon: lon });
+                }, 200);
+
+                window.editMapObj.Event.bind('moveend', function() {
+                    if (window.isSelectingNewPosition) {
+                        const c = window.editMapObj.location();
+                        document.getElementById('editLat').value = c.lat;
+                        document.getElementById('editLon').value = c.lon;
+                    }
+                });
+
+                editLatInput.addEventListener('input', function() {
+                    if (!window.isSelectingNewPosition) {
+                        let lat = parseFloat(editLatInput.value);
+                        let lon = parseFloat(editLonInput.value);
+                        if (!isNaN(lat) && !isNaN(lon)) {
+                            window.editMapObj.location({ lat: lat, lon: lon });
+                        }
+                    }
+                });
+                editLonInput.addEventListener('input', function() {
+                    if (!window.isSelectingNewPosition) {
+                        let lat = parseFloat(editLatInput.value);
+                        let lon = parseFloat(editLonInput.value);
+                        if (!isNaN(lat) && !isNaN(lon)) {
+                            window.editMapObj.location({ lat: lat, lon: lon });
+                        }
+                    }
+                });
+            }, 100);
+
+            // handle submit
+            document.getElementById('editMarkerForm').onsubmit = async function(e) {
+                e.preventDefault();
+                if (window.isSelectingNewPosition) {
+                    alert('กรุณาเลือกตำแหน่งใหม่ให้เสร็จก่อน');
+                    return;
                 }
-            }
-        }
+                const newName = document.getElementById('editName').value.trim();
+                const newAddress = document.getElementById('editAddress').value.trim();
+                const newCapacity = document.getElementById('editCapacity').value;
+                const newLat = parseFloat(document.getElementById('editLat').value);
+                const newLon = parseFloat(document.getElementById('editLon').value);
 
-        function clearAllMarkers() {
-            if (markers.length === 0) {
-                updateStatus('ไม่มีหมุดให้ลบ');
-                return;
-            }
-            if (confirm('ต้องการลบหมุดทั้งหมด ' + markers.length + ' อัน จากแผนที่และ Database หรือไม่?')) {
+                if (!newName || isNaN(newLat) || isNaN(newLon)) {
+                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                    return;
+                }
+
                 try {
-                    markers.forEach(function(markerData) {
-                        map.Overlays.remove(markerData.marker);
+                    await window.updateDoc(window.doc(window.db, "markers", id), {
+                        name: newName,
+                        address: newAddress,
+                        capacity: newCapacity ? parseInt(newCapacity) : null,
+                        lat: newLat,
+                        lon: newLon
                     });
-                    markers = [];
+
+                    markers[index].name = newName;
+                    markers[index].address = newAddress;
+                    markers[index].capacity = newCapacity ? parseInt(newCapacity) : null;
+                    markers[index].lat = newLat;
+                    markers[index].lon = newLon;
+
+                    map.Overlays.remove(markers[index].marker);
+                    markers[index].marker = createMarker(
+                        newLat,
+                        newLon,
+                        newName,
+                        newAddress,
+                        markers[index].active,
+                        markers[index].capacity,
+                        id,
+                        index
+                    );
+                    map.Overlays.add(markers[index].marker);
+
                     updateMarkersList();
-                    updateStatus('✅ ล้างหมุดจากแผนที่แล้ว (ข้อมูลใน Database ยังอยู่)');
-                } catch (error) {
-                    updateStatus('❌ เกิดข้อผิดพลาดในการลบหมุด');
+                    updateStatus('✅ แก้ไขข้อมูลหมุดสำเร็จ');
+                    closeEditMarkerModal();
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาดในการแก้ไข: ' + err.message);
                 }
-            }
+            };
+
+            // ปุ่มเลือกตำแหน่งใหม่
+            document.getElementById('btnSelectNewPosition').onclick = function() {
+                window.isSelectingNewPosition = true;
+                document.getElementById('btnSelectNewPosition').disabled = true;
+                document.getElementById('selectingPositionHint').style.display = '';
+                updateStatus('📍 กรุณาเลื่อนแผนที่ย่อยไปยังตำแหน่งใหม่ แล้วกด "เลือกจุดนี้"');
+
+                // เพิ่มปุ่ม "เลือกจุดนี้" ใต้ crosshair บนแผนที่ย่อย
+                if (!document.getElementById('editMapSelectBtn')) {
+                    const btn = document.createElement('button');
+                    btn.id = 'editMapSelectBtn';
+                    btn.textContent = '✅ เลือกจุดนี้';
+                    btn.style = 'position:absolute;top:calc(50% + 40px);left:50%;transform:translateX(-50%);z-index:1001;background:#059669;color:#fff;padding:10px 18px;border:none;border-radius:8px;font-size:16px;font-weight:600;box-shadow:0 2px 8px rgba(5,150,105,0.18);cursor:pointer;';
+                    btn.onclick = function() {
+                        // ใส่ค่าพิกัดลง input ของ modal edit ทันที
+                        const center = window.editMapObj.location();
+                        const editLatInput = document.getElementById('editLat');
+                        const editLonInput = document.getElementById('editLon');
+                        if (editLatInput && editLonInput) {
+                            editLatInput.value = center.lat;
+                            editLonInput.value = center.lon;
+                            updateStatus('📍 เลือกตำแหน่งใหม่แล้ว กด "บันทึก" เพื่อยืนยัน');
+                        }
+                        // ปิดโหมดเลือก
+                        window.isSelectingNewPosition = false;
+                        document.getElementById('btnSelectNewPosition').disabled = false;
+                        document.getElementById('selectingPositionHint').style.display = 'none';
+                        btn.remove();
+                    };
+                    document.getElementById('editMap').parentNode.appendChild(btn);
+                }
+            };
         }
 
         function clearForm() {
@@ -766,10 +930,23 @@
             document.getElementById('status').innerHTML = message;
         }
 
+        function deleteMarkerFromPopup(id, index) {
+            if (confirm('ต้องการลบหมุดนี้หรือไม่?')) {
+                deleteMarkerFromFirebase(id, index);
+                // ปิดป๊อปอัพ
+                map.InfoWindow.close();
+            }
+        }
+
         window.onerror = function(msg) {
             updateStatus('❌ เกิดข้อผิดพลาด: ' + msg);
             return false;
         };
+
+        function closeEditMarkerModal() {
+            const modal = document.getElementById('editMarkerModalBg');
+            if (modal) modal.parentNode.removeChild(modal);
+        }
     </script>
 </body>
 </html>
