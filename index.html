@@ -1,1 +1,775 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>แผนที่มาร์คจุดพร้อมข้อมูล</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* ส่วนแผนที่ (ซ้าย) */
+        .map-section {
+            flex: 2;
+            position: relative;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(220,38,38,0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220,38,38,0.4);
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        /* เพิ่ม crosshair ตรงกลางจอ */
+        .center-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+            pointer-events: none;
+        }
+        
+        .crosshair-h {
+            width: 30px;
+            height: 2px;
+            background: #dc2626;
+            position: absolute;
+            left: -15px;
+            top: -1px;
+            box-shadow: 0 0 3px rgba(255,255,255,0.8);
+        }
+        
+        .crosshair-v {
+            width: 2px;
+            height: 30px;
+            background: #dc2626;
+            position: absolute;
+            left: -1px;
+            top: -15px;
+            box-shadow: 0 0 3px rgba(255,255,255,0.8);
+        }
+        
+        .crosshair-center {
+            width: 6px;
+            height: 6px;
+            background: #dc2626;
+            border: 2px solid white;
+            border-radius: 50%;
+            position: absolute;
+            left: -3px;
+            top: -3px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 300px;
+        }
+        
+        /* ส่วนฟอร์ม (ขวา) */
+        .form-section {
+            flex: 1;
+            padding: 30px;
+            background: white;
+            overflow-y: auto;
+            min-width: 350px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #dc2626;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #dc2626;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+        }
+        
+        .btn-form {
+            width: 100%;
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .btn-form:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+        }
+        
+        .btn-form:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .coordinate-display {
+            background: #f3f4f6;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .coordinate-display h4 {
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .coordinate-text {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .markers-list {
+            margin-top: 30px;
+        }
+        
+        .markers-list h3 {
+            color: #374151;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .marker-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .marker-item:hover {
+            background: #f3f4f6;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .marker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .marker-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .marker-details {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .marker-capacity {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #9ca3af;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group .form-input {
+            flex: 1;
+        }
 
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-group button {
+            flex: 1;
+        }
+        
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 22px;
+            vertical-align: middle;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #10b981; }
+        input:checked + .slider:before { transform: translateX(16px); }
+    </style>
+    <script type="text/javascript" src="https://api.longdo.com/map3/?key=417740672e7626cdcd09c2756d411dde"></script>
+</head>
+<body onload="init();">
+    <div class="container">
+        <!-- ส่วนแผนที่ (ซ้าย) -->
+        <div class="map-section">
+            <div id="map"></div>
+            <div class="center-crosshair">
+                <div class="crosshair-h"></div>
+                <div class="crosshair-v"></div>
+                <div class="crosshair-center"></div>
+            </div>
+            <div class="status" id="status">
+                กำลังเชื่อมต่อ Database...
+            </div>
+        </div>
+
+        <!-- ส่วนฟอร์ม (ขวา) -->
+        <div class="form-section">
+            <div class="form-group">
+                <button type="button" class="btn-form" style="background: linear-gradient(135deg, #dc2626, #ef4444);" onclick="markCenterPosition()">
+                    📍 มาร์คจุดนี้
+                </button>
+            </div>
+
+            <div class="coordinate-display" id="coordinateDisplay">
+                <h4>📍 ตำแหน่งปัจจุบัน</h4>
+                <div class="coordinate-text" id="currentCoordinate">
+                    เลื่อนแผนที่เพื่อดูพิกัด
+                </div>
+            </div>
+
+            <form id="markerForm">
+                <div class="form-group">
+                    <label class="form-label" for="markerName">ชื่อสถานที่ *</label>
+                    <input type="text" id="markerName" class="form-input" placeholder="เช่น ร้านอาหาร ABC" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="markerAddress">ที่อยู่</label>
+                    <textarea id="markerAddress" class="form-textarea" placeholder="ที่อยู่เต็ม หรือรายละเอียดเพิ่มเติม"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="markerCapacity">จำนวนคนที่รองรับได้</label>
+                    <input type="number" id="markerCapacity" class="form-input" placeholder="เช่น 50" min="1">
+                </div>
+                <button type="submit" class="btn-form" id="addMarkerBtn">
+                    ✅ เพิ่มหมุดพร้อมข้อมูล
+                </button>
+            </form>
+
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" onclick="loadMarkersFromFirebase()">
+                    🔄 โหลดข้อมูล Database
+                </button>
+                <button type="button" class="btn-secondary" onclick="clearAllMarkers()">
+                    🗑️ ลบทั้งหมด
+                </button>
+            </div>
+
+            <div class="markers-list">
+                <h3>📌 หมุดทั้งหมด (<span id="markerCount">0</span>)</h3>
+                <div id="markersList">
+                    <div class="empty-state">
+                        <p>ยังไม่มีหมุด</p>
+                        <p>เลื่อนแผนที่และเพิ่มหมุดแรก!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRCO-wzB0sKIjGXw_IPJGSnjcw00ZBGME",
+            authDomain: "testlongdomap.firebaseapp.com",
+            projectId: "testlongdomap",
+            storageBucket: "testlongdomap.firebasestorage.app",
+            messagingSenderId: "391627017137",
+            appId: "1:391627017137:web:8221c2540c136bccaf0b90",
+            measurementId: "G-BE75QETT05"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.updateDoc = updateDoc;
+
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                updateStatus('✅ Database พร้อมใช้งาน - เลื่อนแผนที่และเพิ่มหมุด');
+                loadMarkersFromFirebase();
+            }, 1000);
+        });
+    </script>
+
+    <script>
+        var map;
+        var markers = [];
+        var currentLat = 13.736717;
+        var currentLon = 100.523186;
+
+        function init() {
+            try {
+                if (typeof longdo === 'undefined') {
+                    setTimeout(init, 500);
+                    return;
+                }
+
+                map = new longdo.Map({
+                    placeholder: document.getElementById('map'),
+                    language: 'th'
+                });
+
+                map.location({ lon: currentLon, lat: currentLat });
+                map.zoom(6);
+
+                map.Event.bind('moveend', updateCurrentCoordinate);
+                updateCurrentCoordinate();
+                updateStatus('กำลังเตรียมแผนที่...');
+            } catch (error) {
+                updateStatus('เกิดข้อผิดพลาดในการโหลดแผนที่: ' + error.message);
+            }
+        }
+
+        function updateCurrentCoordinate() {
+            try {
+                var centerLocation = map.location();
+                if (centerLocation) {
+                    currentLat = centerLocation.lat;
+                    currentLon = centerLocation.lon;
+                    document.getElementById('currentCoordinate').innerHTML =
+                        'ละติจูด: ' + currentLat.toFixed(6) + '<br>' +
+                        'ลองจิจูด: ' + currentLon.toFixed(6);
+                }
+            } catch (error) {
+                console.error('Error updating coordinates:', error);
+            }
+        }
+
+        function markCenterPosition() {
+            try {
+                var center = map.location();
+                currentLat = center.lat;
+                currentLon = center.lon;
+                updateCurrentCoordinate();
+                updateStatus('📍 กำหนดจุดเรียบร้อยแล้ว โปรดกรอกข้อมูลและกด "เพิ่มหมุดพร้อมข้อมูล"');
+            } catch (error) {
+                updateStatus('❌ ไม่สามารถมาร์คตำแหน่งได้');
+            }
+        }
+
+        document.getElementById('markerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            addMarkerWithData();
+        });
+
+        function createMarker(lat, lon, name, address, active) {
+            const markerOptions = {
+                title: name,
+                detail: address || 'ไม่มีที่อยู่'
+            };
+            if (active) {
+                markerOptions.icon = {
+                    url: 'greenMarker.png',
+                    offset: { x: 0, y: -18 },
+                    size: { w: 32, h: 32 }
+                };
+            }
+            return new longdo.Marker(
+                { lon: lon, lat: lat },
+                markerOptions
+            );
+        }
+
+        async function addMarkerWithData() {
+            try {
+                var name = document.getElementById('markerName').value.trim();
+                var address = document.getElementById('markerAddress').value.trim();
+                var capacity = document.getElementById('markerCapacity').value;
+
+                if (!name) {
+                    alert('กรุณากรอกชื่อสถานที่');
+                    return;
+                }
+
+                var addBtn = document.getElementById('addMarkerBtn');
+                var originalText = addBtn.textContent;
+                addBtn.textContent = '💾 กำลังบันทึก...';
+                addBtn.disabled = true;
+
+                var markerData = {
+                    name: name,
+                    address: address,
+                    capacity: capacity ? parseInt(capacity) : null,
+                    lat: currentLat,
+                    lon: currentLon,
+                    createdAt: new Date(),
+                    timestamp: Date.now(),
+                    active: false // เริ่มต้นเป็นปิด
+                };
+
+                // Save to Firebase Firestore
+                const docRef = await window.addDoc(window.collection(window.db, "markers"), markerData);
+
+                // Add marker to map
+                var marker = createMarker(currentLat, currentLon, name, address, false);
+
+                map.Overlays.add(marker);
+
+                markerData.id = docRef.id;
+                markerData.marker = marker;
+                markerData.createdAt = markerData.createdAt.toLocaleString('th-TH');
+                markers.push(markerData);
+
+                updateMarkersList();
+                clearForm();
+                updateStatus('✅ บันทึก "' + name + '" ใน Database สำเร็จ!');
+
+                addBtn.textContent = originalText;
+                addBtn.disabled = false;
+
+            } catch (error) {
+                updateStatus('❌ เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
+                var addBtn = document.getElementById('addMarkerBtn');
+                addBtn.textContent = '✅ เพิ่มหมุดพร้อมข้อมูล';
+                addBtn.disabled = false;
+            }
+        }
+
+        async function loadMarkersFromFirebase() {
+            try {
+                updateStatus('🔄 กำลังโหลดข้อมูลจาก Database...');
+                markers.forEach(function(markerData) {
+                    if (markerData.marker) {
+                        map.Overlays.remove(markerData.marker);
+                    }
+                });
+                markers = [];
+
+                const q = window.query(window.collection(window.db, "markers"), window.orderBy("timestamp", "desc"));
+                const querySnapshot = await window.getDocs(q);
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const marker = createMarker(
+                        data.lat,
+                        data.lon,
+                        data.name,
+                        data.address,
+                        data.active
+                    );
+                    map.Overlays.add(marker);
+
+                    const markerData = {
+                        id: doc.id,
+                        name: data.name,
+                        address: data.address,
+                        capacity: data.capacity,
+                        lat: data.lat,
+                        lon: data.lon,
+                        active: data.active === true, // default false if undefined
+                        createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toLocaleString('th-TH') : new Date().toLocaleString('th-TH'),
+                        marker: marker
+                    };
+                    markers.push(markerData);
+                });
+
+                updateMarkersList();
+                updateStatus('✅ โหลดข้อมูล ' + markers.length + ' จุดจาก Database สำเร็จ!');
+
+            } catch (error) {
+                updateStatus('❌ เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
+            }
+        }
+
+        function updateMarkersList() {
+            var markersList = document.getElementById('markersList');
+            var markerCount = document.getElementById('markerCount');
+            markerCount.textContent = markers.length;
+
+            if (markers.length === 0) {
+                markersList.innerHTML = `<div class="empty-state"><p>ยังไม่มีหมุด</p><p>เลื่อนแผนที่และเพิ่มหมุดแรก!</p></div>`;
+                return;
+            }
+
+            var html = '';
+            markers.forEach(function(markerData, index) {
+                html += `
+                <div class="marker-item">
+                    <div class="marker-header">
+                        <div>
+                            <div class="marker-name">${markerData.name}</div>
+                        </div>
+                        <button class="btn-delete" onclick="deleteMarkerFromFirebase('${markerData.id}', ${index})">🗑️</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                        <label class="switch">
+                            <input type="checkbox" ${markerData.active ? 'checked' : ''} onchange="toggleActive('${markerData.id}', ${index}, this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                        <span>${markerData.active ? 'เปิด' : 'ปิด'}</span>
+                    </div>
+                    <div class="marker-details">
+                        ${markerData.address ? `📍 ${markerData.address}<br>` : ''}
+                        🌍 ${markerData.lat.toFixed(6)}, ${markerData.lon.toFixed(6)}<br>
+                        📅 ${markerData.createdAt}<br>
+                        💾 ID: ${markerData.id}
+                    </div>
+                    ${markerData.capacity ? `<div class="marker-capacity">👥 รองรับ ${markerData.capacity.toLocaleString()} คน</div>` : ''}
+                </div>`;
+            });
+
+            markersList.innerHTML = html;
+        }
+
+        async function toggleActive(docId, index, isActive) {
+            try {
+                await window.updateDoc(window.doc(window.db, "markers", docId), { active: isActive });
+                markers[index].active = isActive;
+
+                // เปลี่ยน icon บนแผนที่
+                map.Overlays.remove(markers[index].marker);
+                markers[index].marker = createMarker(
+                    markers[index].lat,
+                    markers[index].lon,
+                    markers[index].name,
+                    markers[index].address,
+                    isActive
+                );
+                map.Overlays.add(markers[index].marker);
+
+                updateMarkersList();
+                updateStatus(`🔄 เปลี่ยนสถานะหมุด "${markers[index].name}" เป็น${isActive ? 'เปิด' : 'ปิด'}`);
+            } catch (error) {
+                updateStatus('❌ เปลี่ยนสถานะไม่สำเร็จ: ' + error.message);
+            }
+        }
+
+        async function deleteMarkerFromFirebase(docId, index) {
+            if (confirm('ต้องการลบหมุด "' + markers[index].name + '" จาก Database หรือไม่?')) {
+                try {
+                    updateStatus('🗑️ กำลังลบข้อมูลจาก Database...');
+                    await window.deleteDoc(window.doc(window.db, "markers", docId));
+                    map.Overlays.remove(markers[index].marker);
+                    var deletedMarker = markers.splice(index, 1)[0];
+                    updateMarkersList();
+                    updateStatus('✅ ลบ "' + deletedMarker.name + '" จาก Database สำเร็จ!');
+                } catch (error) {
+                    updateStatus('❌ เกิดข้อผิดพลาดในการลบข้อมูล: ' + error.message);
+                }
+            }
+        }
+
+        function clearAllMarkers() {
+            if (markers.length === 0) {
+                updateStatus('ไม่มีหมุดให้ลบ');
+                return;
+            }
+            if (confirm('ต้องการลบหมุดทั้งหมด ' + markers.length + ' อัน จากแผนที่และ Database หรือไม่?')) {
+                try {
+                    markers.forEach(function(markerData) {
+                        map.Overlays.remove(markerData.marker);
+                    });
+                    markers = [];
+                    updateMarkersList();
+                    updateStatus('✅ ล้างหมุดจากแผนที่แล้ว (ข้อมูลใน Database ยังอยู่)');
+                } catch (error) {
+                    updateStatus('❌ เกิดข้อผิดพลาดในการลบหมุด');
+                }
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('markerName').value = '';
+            document.getElementById('markerAddress').value = '';
+            document.getElementById('markerCapacity').value = '';
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+        }
+
+        window.onerror = function(msg) {
+            updateStatus('❌ เกิดข้อผิดพลาด: ' + msg);
+            return false;
+        };
+    </script>
+</body>
+</html>
