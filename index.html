@@ -137,39 +137,6 @@
             min-width: 350px;
         }
         
-        .form-header {
-            margin-bottom: 30px;
-        }
-        
-        .form-header h2 {
-            color: #1f2937;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        
-        .form-header p {
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .firebase-status {
-            background: #dcfce7;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .firebase-status.error {
-            background: #fef2f2;
-            border-color: #fecaca;
-            color: #991b1b;
-        }
-        
         .form-group {
             margin-bottom: 25px;
         }
@@ -396,15 +363,6 @@
 
         <!-- ส่วนฟอร์ม (ขวา) -->
         <div class="form-section">
-            <div class="form-header">
-                <h2>เพิ่มจุดสำคัญ</h2>
-                <p>กรอกข้อมูลสำหรับหมุดใหม่ (บันทึกใน Firebase)</p>
-            </div>
-
-            <div id="firebaseStatus" class="firebase-status">
-                🔥 กำลังเชื่อมต่อ Firebase...
-            </div>
-
             <div class="form-group">
                 <button type="button" class="btn-form" style="background: linear-gradient(135deg, #dc2626, #ef4444);" onclick="markCenterPosition()">
                     📍 มาร์คจุดนี้
@@ -432,7 +390,7 @@
                     <input type="number" id="markerCapacity" class="form-input" placeholder="เช่น 50" min="1">
                 </div>
                 <button type="submit" class="btn-form" id="addMarkerBtn">
-                    ✅ เพิ่มหมุดพร้อมข้อมูล (บันทึกใน Firebase)
+                    ✅ เพิ่มหมุดพร้อมข้อมูล
                 </button>
             </form>
 
@@ -491,7 +449,6 @@
         // Update status when Firebase is ready
         window.addEventListener('load', function() {
             setTimeout(function() {
-                document.getElementById('firebaseStatus').innerHTML = '🔥 Firebase เชื่อมต่อสำเร็จ! พร้อมใช้งาน';
                 updateStatus('✅ Firebase พร้อมใช้งาน - เลื่อนแผนที่และเพิ่มหมุด');
                 
                 // Auto-load markers on startup
@@ -620,7 +577,7 @@
                 
                 // Reset button on error
                 var addBtn = document.getElementById('addMarkerBtn');
-                addBtn.textContent = '✅ เพิ่มหมุดพร้อมข้อมูล (บันทึกใน Firebase)';
+                addBtn.textContent = '✅ เพิ่มหมุดพร้อมข้อมูล';
                 addBtn.disabled = false;
             }
         }
