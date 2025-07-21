@@ -343,6 +343,34 @@
             opacity: 0.7;
             pointer-events: none;
         }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 22px;
+            vertical-align: middle;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #10b981; }
+        input:checked + .slider:before { transform: translateX(16px); }
     </style>
     <script type="text/javascript" src="https://api.longdo.com/map3/?key=417740672e7626cdcd09c2756d411dde"></script>
 </head>
@@ -417,11 +445,9 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDRCO-wzB0sKIjGXw_IPJGSnjcw00ZBGME",
             authDomain: "testlongdomap.firebaseapp.com",
@@ -432,11 +458,9 @@
             measurementId: "G-BE75QETT05"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Make Firebase functions available globally
         window.db = db;
         window.collection = collection;
         window.addDoc = addDoc;
@@ -445,13 +469,11 @@
         window.doc = doc;
         window.query = query;
         window.orderBy = orderBy;
+        window.updateDoc = updateDoc;
 
-        // Update status when Firebase is ready
         window.addEventListener('load', function() {
             setTimeout(function() {
                 updateStatus('✅ Database พร้อมใช้งาน - เลื่อนแผนที่และเพิ่มหมุด');
-                
-                // Auto-load markers on startup
                 loadMarkersFromFirebase();
             }, 1000);
         });
@@ -518,6 +540,24 @@
             addMarkerWithData();
         });
 
+        function createMarker(lat, lon, name, address, active) {
+            const markerOptions = {
+                title: name,
+                detail: address || 'ไม่มีที่อยู่'
+            };
+            if (active) {
+                markerOptions.icon = {
+                    url: 'greenMarker.png',
+                    offset: { x: 0, y: -18 },
+                    size: { w: 32, h: 32 }
+                };
+            }
+            return new longdo.Marker(
+                { lon: lon, lat: lat },
+                markerOptions
+            );
+        }
+
         async function addMarkerWithData() {
             try {
                 var name = document.getElementById('markerName').value.trim();
@@ -529,7 +569,6 @@
                     return;
                 }
 
-                // Show loading
                 var addBtn = document.getElementById('addMarkerBtn');
                 var originalText = addBtn.textContent;
                 addBtn.textContent = '💾 กำลังบันทึก...';
@@ -542,22 +581,18 @@
                     lat: currentLat,
                     lon: currentLon,
                     createdAt: new Date(),
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    active: false // เริ่มต้นเป็นปิด
                 };
 
                 // Save to Firebase Firestore
                 const docRef = await window.addDoc(window.collection(window.db, "markers"), markerData);
-                console.log("Document written with ID: ", docRef.id);
 
                 // Add marker to map
-                var marker = new longdo.Marker({ lon: currentLon, lat: currentLat }, {
-                    title: name,
-                    detail: address || 'ไม่มีที่อยู่'
-                });
+                var marker = createMarker(currentLat, currentLon, name, address, false);
 
                 map.Overlays.add(marker);
-                
-                // Add to local array with Firebase ID
+
                 markerData.id = docRef.id;
                 markerData.marker = marker;
                 markerData.createdAt = markerData.createdAt.toLocaleString('th-TH');
@@ -567,15 +602,11 @@
                 clearForm();
                 updateStatus('✅ บันทึก "' + name + '" ใน Database สำเร็จ!');
 
-                // Reset button
                 addBtn.textContent = originalText;
                 addBtn.disabled = false;
 
             } catch (error) {
-                console.error("Error adding document: ", error);
                 updateStatus('❌ เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
-                
-                // Reset button on error
                 var addBtn = document.getElementById('addMarkerBtn');
                 addBtn.textContent = '✅ เพิ่มหมุดพร้อมข้อมูล';
                 addBtn.disabled = false;
@@ -585,8 +616,6 @@
         async function loadMarkersFromFirebase() {
             try {
                 updateStatus('🔄 กำลังโหลดข้อมูลจาก Database...');
-                
-                // Clear existing markers
                 markers.forEach(function(markerData) {
                     if (markerData.marker) {
                         map.Overlays.remove(markerData.marker);
@@ -594,22 +623,20 @@
                 });
                 markers = [];
 
-                // Query Firestore
                 const q = window.query(window.collection(window.db, "markers"), window.orderBy("timestamp", "desc"));
                 const querySnapshot = await window.getDocs(q);
-                
+
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    
-                    // Add marker to map
-                    const marker = new longdo.Marker({ lon: data.lon, lat: data.lat }, {
-                        title: data.name,
-                        detail: data.address || 'ไม่มีที่อยู่'
-                    });
-                    
+                    const marker = createMarker(
+                        data.lat,
+                        data.lon,
+                        data.name,
+                        data.address,
+                        data.active
+                    );
                     map.Overlays.add(marker);
-                    
-                    // Add to local array
+
                     const markerData = {
                         id: doc.id,
                         name: data.name,
@@ -617,10 +644,10 @@
                         capacity: data.capacity,
                         lat: data.lat,
                         lon: data.lon,
-                        createdAt: data.createdAt ? data.createdAt.toDate().toLocaleString('th-TH') : new Date().toLocaleString('th-TH'),
+                        active: data.active === true, // default false if undefined
+                        createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toLocaleString('th-TH') : new Date().toLocaleString('th-TH'),
                         marker: marker
                     };
-                    
                     markers.push(markerData);
                 });
 
@@ -628,7 +655,6 @@
                 updateStatus('✅ โหลดข้อมูล ' + markers.length + ' จุดจาก Database สำเร็จ!');
 
             } catch (error) {
-                console.error("Error loading documents: ", error);
                 updateStatus('❌ เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
             }
         }
@@ -653,6 +679,13 @@
                         </div>
                         <button class="btn-delete" onclick="deleteMarkerFromFirebase('${markerData.id}', ${index})">🗑️</button>
                     </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                        <label class="switch">
+                            <input type="checkbox" ${markerData.active ? 'checked' : ''} onchange="toggleActive('${markerData.id}', ${index}, this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                        <span>${markerData.active ? 'เปิด' : 'ปิด'}</span>
+                    </div>
                     <div class="marker-details">
                         ${markerData.address ? `📍 ${markerData.address}<br>` : ''}
                         🌍 ${markerData.lat.toFixed(6)}, ${markerData.lon.toFixed(6)}<br>
@@ -666,25 +699,39 @@
             markersList.innerHTML = html;
         }
 
+        async function toggleActive(docId, index, isActive) {
+            try {
+                await window.updateDoc(window.doc(window.db, "markers", docId), { active: isActive });
+                markers[index].active = isActive;
+
+                // เปลี่ยน icon บนแผนที่
+                map.Overlays.remove(markers[index].marker);
+                markers[index].marker = createMarker(
+                    markers[index].lat,
+                    markers[index].lon,
+                    markers[index].name,
+                    markers[index].address,
+                    isActive
+                );
+                map.Overlays.add(markers[index].marker);
+
+                updateMarkersList();
+                updateStatus(`🔄 เปลี่ยนสถานะหมุด "${markers[index].name}" เป็น${isActive ? 'เปิด' : 'ปิด'}`);
+            } catch (error) {
+                updateStatus('❌ เปลี่ยนสถานะไม่สำเร็จ: ' + error.message);
+            }
+        }
+
         async function deleteMarkerFromFirebase(docId, index) {
             if (confirm('ต้องการลบหมุด "' + markers[index].name + '" จาก Database หรือไม่?')) {
                 try {
                     updateStatus('🗑️ กำลังลบข้อมูลจาก Database...');
-                    
-                    // Delete from Firestore
                     await window.deleteDoc(window.doc(window.db, "markers", docId));
-                    
-                    // Remove from map
                     map.Overlays.remove(markers[index].marker);
-                    
-                    // Remove from local array
                     var deletedMarker = markers.splice(index, 1)[0];
-                    
                     updateMarkersList();
                     updateStatus('✅ ลบ "' + deletedMarker.name + '" จาก Database สำเร็จ!');
-                    
                 } catch (error) {
-                    console.error("Error deleting document: ", error);
                     updateStatus('❌ เกิดข้อผิดพลาดในการลบข้อมูล: ' + error.message);
                 }
             }
@@ -697,7 +744,6 @@
             }
             if (confirm('ต้องการลบหมุดทั้งหมด ' + markers.length + ' อัน จากแผนที่และ Database หรือไม่?')) {
                 try {
-                    // Clear from map only (not Firebase)
                     markers.forEach(function(markerData) {
                         map.Overlays.remove(markerData.marker);
                     });
