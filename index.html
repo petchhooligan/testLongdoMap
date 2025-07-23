@@ -720,6 +720,41 @@
             markersList.innerHTML = html;
         }
 
+        async function toggleActive(id, index, isActive) {
+    try {
+        const markerRef = window.doc(window.collection(window.db, "markers"), id);
+        await window.updateDoc(markerRef, {
+            active: isActive
+        });
+
+        markers[index].active = isActive;
+
+        // รีสร้าง marker บนแผนที่ใหม่ด้วยไอคอนสีเขียวถ้า active
+        if (markers[index].marker) {
+            map.Overlays.remove(markers[index].marker);
+        }
+        const newMarker = createMarker(
+            markers[index].lat,
+            markers[index].lon,
+            markers[index].name,
+            markers[index].address,
+            isActive,
+            markers[index].capacity,
+            markers[index].id,
+            index
+        );
+        map.Overlays.add(newMarker);
+        markers[index].marker = newMarker;
+
+        updateMarkersList();
+        updateStatus(`✅ อัปเดตสถานะ "${markers[index].name}" เป็น ${isActive ? 'เปิด' : 'ปิด'}`);
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการอัปเดต active:', error);
+        updateStatus('❌ ไม่สามารถอัปเดตสถานะ active ได้');
+    }
+}
+
+
         // ฟังก์ชันเปิด modal แก้ไข (ใช้ window.prompt แบบง่าย)
         function editMarkerFromPopup(id, index) {
             openEditMarkerModal(id, index);
