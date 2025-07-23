@@ -397,25 +397,132 @@
                 </button>
             </div>
 
-            <div class="coordinate-display" id="coordinateDisplay">
-                <h4>📍 ตำแหน่งปัจจุบัน</h4>
-                <div class="coordinate-text" id="currentCoordinate">
-                    เลื่อนแผนที่เพื่อดูพิกัด
-                </div>
-            </div>
-
             <form id="markerForm">
                 <div class="form-group">
-                    <label class="form-label" for="markerName">ชื่อสถานที่ *</label>
-                    <input type="text" id="markerName" class="form-input" placeholder="เช่น ร้านอาหาร ABC" required>
+                    <label class="form-label" for="shelterType">ประเภทศูนย์พักพิง *</label>
+                    <select id="shelterType" class="form-input" required>
+                        <option value="">-- เลือกประเภท --</option>
+                        <option value="ตามแผน">ตามแผน</option>
+                        <option value="นอกแผน">นอกแผน</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="markerAddress">ที่อยู่</label>
-                    <textarea id="markerAddress" class="form-textarea" placeholder="ที่อยู่เต็ม หรือรายละเอียดเพิ่มเติม"></textarea>
+                    <label class="form-label" for="fullName">ชื่อ-สกุล *</label>
+                    <input type="text" id="fullName" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="markerCapacity">จำนวนคนที่รองรับได้</label>
-                    <input type="number" id="markerCapacity" class="form-input" placeholder="เช่น 50" min="1">
+                    <label class="form-label" for="phone">หมายเลขโทรศัพท์ *</label>
+                    <input type="text" id="phone" class="form-input" required pattern="[0-9]{9,10}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="region">ภาค *</label>
+                    <select id="region" class="form-input" required>
+                        <option value="">-- เลือกภาค --</option>
+                        <option value="เหนือ">เหนือ</option>
+                        <option value="กลาง">กลาง</option>
+                        <option value="ตะวันออกเฉียงเหนือ">ตะวันออกเฉียงเหนือ</option>
+                        <option value="ตะวันออก">ตะวันออก</option>
+                        <option value="ตะวันตก">ตะวันตก</option>
+                        <option value="ใต้">ใต้</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="province">จังหวัด *</label>
+                    <input type="text" id="province" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="district">อำเภอ *</label>
+                    <input type="text" id="district" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="subdistrict">ตำบล *</label>
+                    <input type="text" id="subdistrict" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="village">หมู่บ้าน</label>
+                    <input type="text" id="village" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="zipcode">รหัสไปรษณีย์</label>
+                    <input type="text" id="zipcode" class="form-input" pattern="[0-9]{5}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="place">สถานที่</label>
+                    <input type="text" id="place" class="form-input">
+                </div>
+                <!-- ละติจูด,ลองจิจูด แสดงอัตโนมัติ ไม่ต้องกรอก -->
+                <div class="form-group input-group">
+                    <div style="flex:1;">
+                        <label class="form-label">ละติจูด</label>
+                        <input type="text" id="lat" class="form-input" value="" readonly>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="form-label">ลองจิจูด</label>
+                        <input type="text" id="lon" class="form-input" value="" readonly>
+                    </div>
+                </div>
+                <div class="form-group input-group">
+                    <div style="flex:1;">
+                        <label class="form-label" for="electricity">ไฟฟ้า</label>
+                        <select id="electricity" class="form-input">
+                            <option value="มี">มี</option>
+                            <option value="ไม่มี" selected>ไม่มี</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="form-label" for="water">ประปา</label>
+                        <select id="water" class="form-input">
+                            <option value="มี">มี</option>
+                            <option value="ไม่มี" selected>ไม่มี</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="form-label" for="wifi">Wifi</label>
+                        <select id="wifi" class="form-input">
+                            <option value="มี">มี</option>
+                            <option value="ไม่มี" selected>ไม่มี</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group input-group">
+                    <div style="flex:1;">
+                        <label class="form-label" for="pet">รองรับสัตว์เลี้ยง</label>
+                        <select id="pet" class="form-input">
+                            <option value="มี">มี</option>
+                            <option value="ไม่มี" selected>ไม่มี</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="form-label" for="tent">สถานที่กางเต็นท์</label>
+                        <select id="tent" class="form-input">
+                            <option value="มี">มี</option>
+                            <option value="ไม่มี" selected>ไม่มี</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="form-label" for="toilet">สุขา (จำนวน)</label>
+                        <input type="text" id="toilet" class="form-input" placeholder="จำนวนสุขา">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="parking">ที่จอดรถ (จำนวน)</label>
+                    <input type="text" id="parking" class="form-input" placeholder="จำนวนที่จอดรถ">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="canSupport">รองรับผู้พักพิง (คน)</label>
+                    <input type="number" id="canSupport" class="form-input" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="currentSupport">จำนวนผู้พักพิง (คน)</label>
+                    <input type="number" id="currentSupport" class="form-input" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="status">สถานะ *</label>
+                    <select id="status" class="form-input" required>
+                        <option value="เปิด">เปิด</option>
+                        <option value="ปิด" selected>ปิด</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn-form" id="addMarkerBtn">
                     ✅ เพิ่มหมุดพร้อมข้อมูล
@@ -516,9 +623,12 @@
                 if (centerLocation) {
                     currentLat = centerLocation.lat;
                     currentLon = centerLocation.lon;
-                    document.getElementById('currentCoordinate').innerHTML =
-                        'ละติจูด: ' + currentLat.toFixed(6) + '<br>' +
-                        'ลองจิจูด: ' + currentLon.toFixed(6);
+                    var coordElem = document.getElementById('currentCoordinate');
+                    if (coordElem) {
+                        coordElem.innerHTML =
+                            'ละติจูด: ' + currentLat.toFixed(6) + '<br>' +
+                            'ลองจิจูด: ' + currentLon.toFixed(6);
+                    }
                 }
             } catch (error) {
                 console.error('Error updating coordinates:', error);
@@ -532,6 +642,9 @@
                 currentLon = center.lon;
                 updateCurrentCoordinate();
                 updateStatus('📍 กำหนดจุดเรียบร้อยแล้ว โปรดกรอกข้อมูลและกด "เพิ่มหมุดพร้อมข้อมูล"');
+                // เพิ่มเติม: ใส่ค่าลง input lat/lon
+                document.getElementById('lat').value = currentLat;
+                document.getElementById('lon').value = currentLon;
             } catch (error) {
                 updateStatus('❌ ไม่สามารถมาร์คตำแหน่งได้');
             }
@@ -542,19 +655,45 @@
             addMarkerWithData();
         });
 
-        function createMarker(lat, lon, name, address, active, capacity, markerId, markerIndex) {
+        function createMarker(lat, lon, name, address, active, capacity, markerId, markerIndex, extraData = {}) {
             let detail = '';
-            if (address) detail += `📍 ${address}<br>`;
+            // แสดงข้อมูลทุกฟิลด์ที่มีในฟอร์ม
+            if (extraData.shelterType) detail += `🏢 ประเภทศูนย์: ${extraData.shelterType}<br>`;
+            if (name) detail += `👤 ชื่อ-สกุล: ${name}<br>`;
+            if (extraData.phone) detail += `📞 โทร: ${extraData.phone}<br>`;
+            if (extraData.region) detail += `🗺️ ภาค: ${extraData.region}<br>`;
+            if (extraData.province) detail += `จังหวัด: ${extraData.province}<br>`;
+            if (extraData.district) detail += `อำเภอ: ${extraData.district}<br>`;
+            if (extraData.subdistrict) detail += `ตำบล: ${extraData.subdistrict}<br>`;
+            if (extraData.village) detail += `หมู่บ้าน: ${extraData.village}<br>`;
+            if (extraData.zipcode) detail += `รหัสไปรษณีย์: ${extraData.zipcode}<br>`;
+            if (address) detail += `📍 สถานที่: ${address}<br>`;
             detail += `🌍 ${lat.toFixed(6)}, ${lon.toFixed(6)}<br>`;
-            if (capacity) detail += `👥 รองรับ ${capacity.toLocaleString()} คน<br>`;
-            // เพิ่มปุ่มลบและแก้ไขในป๊อปอัพ
+            if (capacity) detail += `👥 รองรับ: ${capacity.toLocaleString()} คน<br>`;
+            if (extraData.currentSupport) detail += `👤 ผู้พักพิง: ${extraData.currentSupport} คน<br>`;
+            if (extraData.parking) detail += `🚗 ที่จอดรถ: ${extraData.parking} คัน<br>`;
+            if (extraData.electricity) detail += `⚡ ไฟฟ้า<br>`;
+            if (extraData.water) detail += `💧 ประปา<br>`;
+            if (extraData.toilet) detail += `🚻 สุขา<br>`;
+            if (extraData.wifi) detail += `📶 Wifi<br>`;
+            if (extraData.pet) detail += `🐾 รองรับสัตว์เลี้ยง<br>`;
+            if (extraData.tent) detail += `⛺ กางเต็นท์<br>`;
+            // เพิ่ม toggle เปิด/ปิด
             if (typeof markerId !== 'undefined' && typeof markerIndex !== 'undefined') {
+                detail += `
+                    <div style='margin:8px 0;'>
+                        <label class="switch">
+                            <input type="checkbox" ${active ? 'checked' : ''} onchange="toggleActive('${markerId}', ${markerIndex}, this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                        <span style='margin-left:8px;'>${active ? 'เปิด' : 'ปิด'}</span>
+                    </div>
+                `;
                 detail += `
                     <button onclick="editMarkerFromPopup('${markerId}', ${markerIndex})" style="margin-top:8px;margin-right:8px;background:#3b82f6;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">✏️ แก้ไข</button>
                     <button onclick="deleteMarkerFromPopup('${markerId}', ${markerIndex})" style="margin-top:8px;background:#ef4444;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">🗑️ ลบหมุดนี้</button>
                 `;
             }
-
             const markerOptions = {
                 title: name,
                 detail: detail
@@ -566,20 +705,53 @@
                     size: { w: 32, h: 32 }
                 };
             }
-            return new longdo.Marker(
+            const marker = new longdo.Marker(
                 { lon: lon, lat: lat },
                 markerOptions
             );
+            // เพิ่ม event hover เพื่อแสดง/ปิดป๊อปอัพ (เช็คว่ามี Event ก่อน)
+            if (marker && marker.Event && typeof marker.Event.bind === 'function') {
+                marker.Event.bind('mouseover', function() {
+                    map.InfoWindow.open(marker);
+                });
+                marker.Event.bind('mouseout', function() {
+                    map.InfoWindow.close();
+                });
+            }
+            return marker;
         }
 
         async function addMarkerWithData() {
             try {
-                var name = document.getElementById('markerName').value.trim();
-                var address = document.getElementById('markerAddress').value.trim();
-                var capacity = document.getElementById('markerCapacity').value;
+                // ดึงค่าทุกฟิลด์จากฟอร์ม
+                var shelterType = document.getElementById('shelterType').value;
+                if (!["ตามแผน", "นอกแผน", "อื่นๆ"].includes(shelterType)) shelterType = '';
+                var name = document.getElementById('fullName').value.trim();
+                var phone = document.getElementById('phone').value.trim();
+                var region = document.getElementById('region').value;
+                var province = document.getElementById('province').value.trim();
+                var district = document.getElementById('district').value.trim();
+                var subdistrict = document.getElementById('subdistrict').value.trim();
+                var village = document.getElementById('village').value.trim();
+                var zipcode = document.getElementById('zipcode').value.trim();
+                var place = document.getElementById('place').value.trim();
+                var lat = document.getElementById('lat').value;
+                var lon = document.getElementById('lon').value;
+                var electricity = document.getElementById('electricity').value;
+                var water = document.getElementById('water').value;
+                var wifi = document.getElementById('wifi').value;
+                var pet = document.getElementById('pet').value;
+                var tent = document.getElementById('tent').value;
+                var toilet = document.getElementById('toilet').value.trim();
+                var parking = document.getElementById('parking').value.trim();
+                var canSupport = document.getElementById('canSupport').value;
+                var currentSupport = document.getElementById('currentSupport').value;
+                var status = document.getElementById('status').value;
+                if (!status) status = 'เปิด';
+                var active = (status === 'เปิด');
 
                 if (!name) {
-                    alert('กรุณากรอกชื่อสถานที่');
+                    alert('กรุณากรอกชื่อ-สกุล');
                     return;
                 }
 
@@ -589,21 +761,37 @@
                 addBtn.disabled = true;
 
                 var markerData = {
+                    shelterType: shelterType || '',
                     name: name,
-                    address: address,
-                    capacity: capacity ? parseInt(capacity) : null,
-                    lat: currentLat,
-                    lon: currentLon,
+                    phone: phone || '',
+                    region: region || '',
+                    province: province || '',
+                    district: district || '',
+                    subdistrict: subdistrict || '',
+                    village: village || '',
+                    zipcode: zipcode || '',
+                    address: place || '',
+                    lat: lat ? parseFloat(lat) : currentLat,
+                    lon: lon ? parseFloat(lon) : currentLon,
+                    electricity: electricity || '',
+                    water: water || '',
+                    wifi: wifi || '',
+                    pet: pet || '',
+                    tent: tent || '',
+                    toilet: toilet || '',
+                    parking: parking || '',
+                    capacity: canSupport ? parseInt(canSupport) : null,
+                    currentSupport: currentSupport ? parseInt(currentSupport) : null,
+                    active: active,
                     createdAt: new Date(),
                     timestamp: Date.now(),
-                    active: false // เริ่มต้นเป็นปิด
                 };
 
                 // Save to Firebase Firestore
                 const docRef = await window.addDoc(window.collection(window.db, "markers"), markerData);
 
                 // Add marker to map
-                var marker = createMarker(currentLat, currentLon, name, address, false, markerData.capacity, markerData.id, markers.length);
+                var marker = createMarker(markerData.lat, markerData.lon, name, place, false, markerData.capacity, markerData.id, markers.length, markerData);
 
                 map.Overlays.add(marker);
 
@@ -650,21 +838,19 @@
                         data.active,
                         data.capacity,
                         doc.id,
-                        markers.length // index ปัจจุบัน
+                        markers.length, // index ปัจจุบัน
+                        data // ส่งข้อมูลทั้งหมดที่มีอยู่ในฟอร์ม
                     );
                     map.Overlays.add(marker);
 
                     const markerData = {
+                        ...data,
                         id: doc.id,
-                        name: data.name,
-                        address: data.address,
-                        capacity: data.capacity,
-                        lat: data.lat,
-                        lon: data.lon,
-                        active: data.active === true, // default false if undefined
+                        marker: marker,
                         createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toLocaleString('th-TH') : new Date().toLocaleString('th-TH'),
-                        marker: marker
+                        active: data.active === true
                     };
+                    markerData.status = markerData.active ? 'เปิด' : 'ปิด';
                     markers.push(markerData);
                 });
 
@@ -714,6 +900,7 @@
                         💾 ID: ${markerData.id}
                     </div>
                     ${markerData.capacity ? `<div class="marker-capacity">👥 รองรับ ${markerData.capacity.toLocaleString()} คน</div>` : ''}
+                    ${markerData.parking ? `<div class="marker-capacity">🚗 ที่จอดรถ ${markerData.parking.toLocaleString()} คัน</div>` : ''}
                 </div>`;
             });
 
@@ -728,6 +915,7 @@
         });
 
         markers[index].active = isActive;
+        markers[index].status = isActive ? 'เปิด' : 'ปิด';
 
         // รีสร้าง marker บนแผนที่ใหม่ด้วยไอคอนสีเขียวถ้า active
         if (markers[index].marker) {
@@ -741,7 +929,8 @@
             isActive,
             markers[index].capacity,
             markers[index].id,
-            index
+            index,
+            markers[index] // ส่งข้อมูลครบทุกฟิลด์
         );
         map.Overlays.add(newMarker);
         markers[index].marker = newMarker;
@@ -758,7 +947,9 @@
         // ฟังก์ชันเปิด modal แก้ไข (ใช้ window.prompt แบบง่าย)
         function editMarkerFromPopup(id, index) {
             openEditMarkerModal(id, index);
-            map.InfoWindow.close();
+            if (map && map.InfoWindow && typeof map.InfoWindow.close === 'function') {
+                map.InfoWindow.close();
+            }
         }
         function editMarkerFromCard(id, index) {
             openEditMarkerModal(id, index);
@@ -768,20 +959,112 @@
         function createEditModalHTML(marker, index) {
             return `
             <div id="editMarkerModalBg" style="position:fixed;z-index:99999;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
-                <div style="background:#fff;padding:32px 24px;border-radius:16px;min-width:320px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,0.18);position:relative;">
+                <div style="background:#fff;padding:32px 24px;border-radius:16px;min-width:350px;max-width:600px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.18);position:relative;overflow-y:auto;max-height:90vh;">
                     <h2 style="font-size:20px;font-weight:700;margin-bottom:18px;">✏️ แก้ไขหมุด</h2>
                     <form id="editMarkerForm">
                         <div style="margin-bottom:16px;">
-                            <label style="font-weight:600;">ชื่อสถานที่ *</label>
-                            <input type="text" id="editName" value="${marker.name}" required style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                            <label style="font-weight:600;">ประเภทศูนย์พักพิง *</label>
+                            <select id="editShelterType" class="form-input" required>
+                                <option value="ตามแผน" ${marker.shelterType === 'ตามแผน' ? 'selected' : ''}>ตามแผน</option>
+                                <option value="นอกแผน" ${marker.shelterType === 'นอกแผน' ? 'selected' : ''}>นอกแผน</option>
+                                <option value="อื่นๆ" ${marker.shelterType === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
+                            </select>
                         </div>
                         <div style="margin-bottom:16px;">
-                            <label style="font-weight:600;">ที่อยู่</label>
-                            <textarea id="editAddress" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">${marker.address || ''}</textarea>
+                            <label style="font-weight:600;">ชื่อ-สกุล *</label>
+                            <input type="text" id="editName" value="${marker.name || ''}" required style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">หมายเลขโทรศัพท์ *</label>
+                            <input type="text" id="editPhone" value="${marker.phone || ''}" required style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">ภาค *</label>
+                            <input type="text" id="editRegion" value="${marker.region || ''}" required style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">จังหวัด *</label>
+                            <input type="text" id="editProvince" value="${marker.province || ''}" required style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">อำเภอ *</label>
+                            <input type="text" id="editDistrict" value="${marker.district || ''}" required style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">ตำบล *</label>
+                            <input type="text" id="editSubdistrict" value="${marker.subdistrict || ''}" required style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">หมู่บ้าน</label>
+                            <input type="text" id="editVillage" value="${marker.village || ''}" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">รหัสไปรษณีย์</label>
+                            <input type="text" id="editZipcode" value="${marker.zipcode || ''}" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">สถานที่</label>
+                            <input type="text" id="editPlace" value="${marker.address || ''}" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
                         </div>
                         <div style="margin-bottom:16px;">
                             <label style="font-weight:600;">จำนวนคนที่รองรับได้</label>
                             <input type="number" id="editCapacity" min="1" value="${marker.capacity ? marker.capacity : ''}" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">จำนวนผู้พักพิง</label>
+                            <input type="number" id="editCurrentSupport" min="0" value="${marker.currentSupport ? marker.currentSupport : ''}" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">จำนวนที่จอดรถ</label>
+                            <input type="text" id="editParking" value="${marker.parking || ''}" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">สุขา (จำนวน)</label>
+                            <input type="text" id="editToilet" value="${marker.toilet || ''}" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;">
+                        </div>
+                        <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                            <div style="flex:1;min-width:120px;">
+                                <label style="font-weight:600;">ไฟฟ้า</label>
+                                <select id="editElectricity" class="form-input">
+                                    <option value="มี" ${marker.electricity === 'มี' ? 'selected' : ''}>มี</option>
+                                    <option value="ไม่มี" ${marker.electricity === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;min-width:120px;">
+                                <label style="font-weight:600;">ประปา</label>
+                                <select id="editWater" class="form-input">
+                                    <option value="มี" ${marker.water === 'มี' ? 'selected' : ''}>มี</option>
+                                    <option value="ไม่มี" ${marker.water === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;min-width:120px;">
+                                <label style="font-weight:600;">Wifi</label>
+                                <select id="editWifi" class="form-input">
+                                    <option value="มี" ${marker.wifi === 'มี' ? 'selected' : ''}>มี</option>
+                                    <option value="ไม่มี" ${marker.wifi === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;min-width:120px;">
+                                <label style="font-weight:600;">รองรับสัตว์เลี้ยง</label>
+                                <select id="editPet" class="form-input">
+                                    <option value="มี" ${marker.pet === 'มี' ? 'selected' : ''}>มี</option>
+                                    <option value="ไม่มี" ${marker.pet === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;min-width:120px;">
+                                <label style="font-weight:600;">สถานที่กางเต็นท์</label>
+                                <select id="editTent" class="form-input">
+                                    <option value="มี" ${marker.tent === 'มี' ? 'selected' : ''}>มี</option>
+                                    <option value="ไม่มี" ${marker.tent === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-weight:600;">สถานะ *</label>
+                            <select id="editStatus" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid #e5e7eb;" onchange="window.syncEditStatusWithActive && window.syncEditStatusWithActive(this.value)">
+                                <option value="เปิด" ${marker.active ? 'selected' : ''}>เปิด</option>
+                                <option value="ปิด" ${!marker.active ? 'selected' : ''}>ปิด</option>
+                            </select>
                         </div>
                         <div style="margin-bottom:16px;">
                             <label style="font-weight:600;">ตำแหน่งพิกัด</label>
@@ -820,12 +1103,45 @@
             editingMarkerModalDiv.innerHTML = createEditModalHTML(markers[index], index);
             document.body.appendChild(editingMarkerModalDiv);
 
+            // ซิงค์สถานะกับ active ใน modal
+            window.syncEditStatusWithActive = function(val) {
+                markers[index].active = (val === 'เปิด');
+                markers[index].status = markers[index].active ? 'เปิด' : 'ปิด';
+            };
+            // เมื่อเปิด modal ให้ sync ค่า status กับ active ด้วย
+            var statusSel = document.getElementById('editStatus');
+            if (statusSel) {
+                statusSel.value = markers[index].active ? 'เปิด' : 'ปิด';
+            }
+
             setTimeout(function() {
                 let editLatInput = document.getElementById('editLat');
                 let editLonInput = document.getElementById('editLon');
-                // แปลง lat/lon ให้เป็นตัวเลขเสมอ
-                let lat = parseFloat(markers[index].lat);
-                let lon = parseFloat(markers[index].lon);
+                // เติมค่าเดิมในฟอร์มแก้ไข
+                var m = markers[index];
+                var setVal = (id, val) => { var el = document.getElementById(id); if (el) el.value = val ?? ''; };
+                setVal('editShelterType', m.shelterType);
+                setVal('editName', m.name);
+                setVal('editPhone', m.phone);
+                setVal('editRegion', m.region);
+                setVal('editProvince', m.province);
+                setVal('editDistrict', m.district);
+                setVal('editSubdistrict', m.subdistrict);
+                setVal('editVillage', m.village);
+                setVal('editZipcode', m.zipcode);
+                setVal('editPlace', m.address);
+                setVal('editCapacity', m.capacity);
+                setVal('editCurrentSupport', m.currentSupport);
+                setVal('editParking', m.parking);
+                setVal('editToilet', m.toilet);
+                setVal('editElectricity', m.electricity);
+                setVal('editWater', m.water);
+                setVal('editWifi', m.wifi);
+                setVal('editPet', m.pet);
+                setVal('editTent', m.tent);
+                setVal('editStatus', m.active ? 'เปิด' : 'ปิด');
+                setVal('editLat', m.lat);
+                setVal('editLon', m.lon);
 
                 window.editMapObj = new longdo.Map({
                     placeholder: document.getElementById('editMap'),
@@ -874,9 +1190,27 @@
                     alert('กรุณาเลือกตำแหน่งใหม่ให้เสร็จก่อน');
                     return;
                 }
+                const newShelterType = document.getElementById('editShelterType').value.trim();
                 const newName = document.getElementById('editName').value.trim();
-                const newAddress = document.getElementById('editAddress').value.trim();
+                const newPhone = document.getElementById('editPhone').value.trim();
+                const newRegion = document.getElementById('editRegion').value.trim();
+                const newProvince = document.getElementById('editProvince').value.trim();
+                const newDistrict = document.getElementById('editDistrict').value.trim();
+                const newSubdistrict = document.getElementById('editSubdistrict').value.trim();
+                const newVillage = document.getElementById('editVillage').value.trim();
+                const newZipcode = document.getElementById('editZipcode').value.trim();
+                const newAddress = document.getElementById('editPlace').value.trim();
                 const newCapacity = document.getElementById('editCapacity').value;
+                const newCurrentSupport = document.getElementById('editCurrentSupport').value;
+                const newParking = document.getElementById('editParking').value;
+                const newElectricity = document.getElementById('editElectricity').value;
+                const newWater = document.getElementById('editWater').value;
+                const newToilet = document.getElementById('editToilet').value;
+                const newWifi = document.getElementById('editWifi').value;
+                const newPet = document.getElementById('editPet').value;
+                const newTent = document.getElementById('editTent').value;
+                const newStatus = document.getElementById('editStatus').value;
+                const newActive = (newStatus === 'เปิด');
                 const newLat = parseFloat(document.getElementById('editLat').value);
                 const newLon = parseFloat(document.getElementById('editLon').value);
 
@@ -887,18 +1221,32 @@
 
                 try {
                     await window.updateDoc(window.doc(window.db, "markers", id), {
+                        shelterType: newShelterType,
                         name: newName,
+                        phone: newPhone,
+                        region: newRegion,
+                        province: newProvince,
+                        district: newDistrict,
+                        subdistrict: newSubdistrict,
+                        village: newVillage,
+                        zipcode: newZipcode,
                         address: newAddress,
                         capacity: newCapacity ? parseInt(newCapacity) : null,
+                        currentSupport: newCurrentSupport ? parseInt(newCurrentSupport) : null,
+                        parking: newParking ? parseInt(newParking) : null,
+                        electricity: newElectricity,
+                        water: newWater,
+                        toilet: newToilet,
+                        wifi: newWifi,
+                        pet: newPet,
+                        tent: newTent,
+                        active: newActive,
                         lat: newLat,
                         lon: newLon
                     });
 
-                    markers[index].name = newName;
-                    markers[index].address = newAddress;
-                    markers[index].capacity = newCapacity ? parseInt(newCapacity) : null;
-                    markers[index].lat = newLat;
-                    markers[index].lon = newLon;
+                    markers[index].active = newActive;
+                    markers[index].status = newActive ? 'เปิด' : 'ปิด';
 
                     map.Overlays.remove(markers[index].marker);
                     markers[index].marker = createMarker(
@@ -909,7 +1257,8 @@
                         markers[index].active,
                         markers[index].capacity,
                         id,
-                        index
+                        index,
+                        markers[index] // ส่งข้อมูลทั้งหมดที่มีอยู่ในฟอร์ม
                     );
                     map.Overlays.add(markers[index].marker);
 
@@ -956,13 +1305,21 @@
         }
 
         function clearForm() {
-            document.getElementById('markerName').value = '';
-            document.getElementById('markerAddress').value = '';
-            document.getElementById('markerCapacity').value = '';
+            document.getElementById('fullName').value = '';
+            document.getElementById('place').value = '';
+            document.getElementById('canSupport').value = '';
+            document.getElementById('parking').value = '';
         }
 
         function updateStatus(message) {
-            document.getElementById('status').innerHTML = message;
+            var statusElem = document.getElementById('status');
+            statusElem.innerHTML = message;
+            statusElem.style.opacity = 1;
+            statusElem.style.transition = 'opacity 0.5s';
+            if (window._statusTimeout) clearTimeout(window._statusTimeout);
+            window._statusTimeout = setTimeout(function() {
+                statusElem.style.opacity = 0;
+            }, 5000);
         }
 
         function deleteMarkerFromPopup(id, index) {
