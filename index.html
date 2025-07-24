@@ -1053,7 +1053,7 @@
                 markerItem.innerHTML = `
                     <div class="marker-header">
                         <div style="flex-grow: 1;">
-                            <div class="marker-name">${markerData.name} (${markerData.active ? 'เปิด' : 'ปิด'})</div>
+                            <div class="marker-name">${markerData.name}</div>
                             <div class="marker-details">
                                 ${markerData.subdistrict || ''} ${markerData.district || ''} ${markerData.province || ''} ${markerData.zipcode || ''}<br>
                                 พิกัด: ${markerData.lat.toFixed(6)}, ${markerData.lon.toFixed(6)}<br>
@@ -1061,7 +1061,13 @@
                                 เพิ่มเมื่อ: ${markerData.createdAt}
                             </div>
                         </div>
-                        <button class="btn-delete" onclick="deleteMarker('${markerData.id}', ${index})">ลบ</button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label class="switch">
+                                <input type="checkbox" ${markerData.active ? 'checked' : ''} onchange="toggleActive('${markerData.id}', ${index}, this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                            <span style='font-weight: 600; color: ${markerData.active ? '#10b981' : '#dc2626'};'>${markerData.active ? 'เปิด' : 'ปิด'}</span>
+                        </div>
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
                         ${markerData.electricity === 'มี' ? `<span style="background: #e0f7fa; color: #00796b; padding: 4px 8px; border-radius: 4px; font-size: 11px; display: inline-block;">⚡ ไฟฟ้า</span>` : ''}
@@ -1076,6 +1082,7 @@
                         <button class="btn-secondary" style="flex:1;" onclick="map.location({ lat: ${markerData.lat}, lon: ${markerData.lon} }, true, 16);">ดูบนแผนที่</button>
                         <button class="btn-secondary" style="background-color: #3b82f6; flex:1;" onclick="editMarker('${markerData.id}', ${index})">แก้ไข</button>
                         <button class="btn-secondary" style="background-color: #10b981; flex:1;" onclick="getDirections(${markerData.lat}, ${markerData.lon})">เส้นทาง</button>
+                        <button class="btn-secondary" style="background-color: #ef4444; flex:1;" onclick="deleteMarker('${markerData.id}', ${index})">ลบ</button>
                     </div>
                 `;
                 markersListDiv.appendChild(markerItem);
@@ -1264,7 +1271,7 @@
                 updateStatus('✅ อัปเดต "' + name + '" สำเร็จ!', 5000);
 
                 // Reset form button to add mode
-                updateBtn.textContent = originalText;
+                updateBtn.textContent = '✅ เพิ่มหมุดพร้อมข้อมูล';
                 updateBtn.onclick = function() {
                     addMarkerWithData();
                 };
