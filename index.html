@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>แผนที่มาร์คจุดพร้อมข้อมูล</title>
@@ -10,7 +11,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8fafc;
@@ -26,7 +28,7 @@
             flex: 2;
             position: relative;
             background: white;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
         }
 
         #map {
@@ -43,7 +45,7 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(220,38,38,0.3);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
@@ -53,7 +55,7 @@
         .btn-primary:hover {
             background: linear-gradient(135deg, #b91c1c, #dc2626);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220,38,38,0.4);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
         }
 
         .btn-secondary {
@@ -89,7 +91,7 @@
             position: absolute;
             left: -15px;
             top: -1px;
-            box-shadow: 0 0 3px rgba(255,255,255,0.8);
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
         }
 
         .crosshair-v {
@@ -99,7 +101,7 @@
             position: absolute;
             left: -1px;
             top: -15px;
-            box-shadow: 0 0 3px rgba(255,255,255,0.8);
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
         }
 
         .crosshair-center {
@@ -111,20 +113,20 @@
             position: absolute;
             left: -3px;
             top: -3px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
         }
 
         .status {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
             padding: 12px 16px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
             z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             max-width: 300px;
         }
 
@@ -163,7 +165,7 @@
             outline: none;
             border-color: #dc2626;
             background: white;
-            box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         }
 
         .form-textarea {
@@ -182,7 +184,7 @@
             outline: none;
             border-color: #dc2626;
             background: white;
-            box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         }
 
         .btn-form {
@@ -202,7 +204,7 @@
         .btn-form:hover {
             background: linear-gradient(135deg, #047857, #059669);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
         }
 
         .btn-form:disabled {
@@ -260,7 +262,7 @@
         .marker-item:hover {
             background: #f3f4f6;
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .marker-header {
@@ -351,29 +353,137 @@
             height: 22px;
             vertical-align: middle;
         }
-        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-color: #ccc;
             transition: .4s;
             border-radius: 22px;
         }
+
         .slider:before {
             position: absolute;
             content: "";
-            height: 16px; width: 16px;
-            left: 3px; bottom: 3px;
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
         }
-        input:checked + .slider { background-color: #10b981; }
-        input:checked + .slider:before { transform: translateX(16px); }
+
+        input:checked+.slider {
+            background-color: #10b981;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(16px);
+        }
+
+        /* CSS สำหรับป๊อปอัพแก้ไข */
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .edit-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 95vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .edit-modal-header {
+            margin-bottom: 20px;
+            color: #1f2937;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .edit-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 18px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-modal-close:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .edit-grid {
+            display: block;
+            margin-top: 20px;
+        }
+
+        .edit-form-section {
+            overflow-y: auto;
+            max-height: 80vh;
+            padding-right: 10px;
+        }
+
+        /* CSS สำหรับแผนที่ในหน้าแก้ไข */
+        .edit-map-container {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .edit-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .edit-modal-content {
+                width: 98%;
+                margin: 10px;
+            }
+
+            .edit-map-container {
+                height: 250px;
+            }
+        }
     </style>
     <script type="text/javascript" src="https://api.longdo.com/map3/?key=417740672e7626cdcd09c2756d411dde"></script>
 </head>
+
 <body onload="init();">
     <div class="container">
         <div class="map-section">
@@ -390,154 +500,24 @@
 
         <div class="form-section">
             <div class="form-group" style="display:flex; flex-wrap:wrap; gap:10px;">
-                <button type="button" class="btn-form" style="background: linear-gradient(135deg, #dc2626, #ef4444); flex:1;" onclick="markCenterPosition()">
-                    📍 มาร์คจุดนี้
+                <button type="button" class="btn-form"
+                    style="width: 100%; background: linear-gradient(135deg, #3b82f6, #60a5fa);"
+                    onclick="openCreateModal()">
+                    ➕ เพิ่มศูนย์พักพิงใหม่
                 </button>
-                <button type="button" class="btn-form" style="background: linear-gradient(135deg, #f59e42, #fbbf24); flex:1;" onclick="drawAllRadii()">
+                <button type="button" class="btn-form"
+                    style="background: linear-gradient(135deg, #f59e42, #fbbf24); flex:1;" onclick="drawAllRadii()">
                     ⭕ ดูรัศมีทั้งหมด
                 </button>
-                <button type="button" class="btn-form" style="background: linear-gradient(135deg, #6b7280, #9ca3af); flex:1;" onclick="clearAllRadii()">
+                <button type="button" class="btn-form"
+                    style="background: linear-gradient(135deg, #6b7280, #9ca3af); flex:1;" onclick="clearAllRadii()">
                     🚫 ลบรัศมีทั้งหมด
                 </button>
             </div>
 
-            <form id="markerForm">
-                <div class="form-group">
-                    <label class="form-label" for="shelterType">ประเภทศูนย์พักพิง *</label>
-                    <select id="shelterType" class="form-input" required>
-                        <option value="">-- เลือกประเภท --</option>
-                        <option value="ตามแผน">ตามแผน</option>
-                        <option value="นอกแผน">นอกแผน</option>
-                        <option value="อื่นๆ">อื่นๆ</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="fullName">ชื่อ-สกุล *</label>
-                    <input type="text" id="fullName" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="phone">หมายเลขโทรศัพท์ *</label>
-                    <input type="text" id="phone" class="form-input" required pattern="[0-9]{9,10}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="region">ภาค *</label>
-                    <select id="region" class="form-input" required>
-                        <option value="">-- เลือกภาค --</option>
-                        <option value="เหนือ">เหนือ</option>
-                        <option value="กลาง">กลาง</option>
-                        <option value="ตะวันออกเฉียงเหนือ">ตะวันออกเฉียงเหนือ</option>
-                        <option value="ตะวันออก">ตะวันออก</option>
-                        <option value="ตะวันตก">ตะวันตก</option>
-                        <option value="ใต้">ใต้</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="province">จังหวัด *</label>
-                    <input type="text" id="province" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="district">เขต/อำเภอ *</label>
-                    <input type="text" id="district" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="subdistrict">แขวง/ตำบล *</label>
-                    <input type="text" id="subdistrict" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="village">หมู่บ้าน</label>
-                    <input type="text" id="village" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="zipcode">รหัสไปรษณีย์</label>
-                    <input type="text" id="zipcode" class="form-input" pattern="[0-9]{5}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="place">สถานที่</label>
-                    <input type="text" id="place" class="form-input">
-                </div>
-                <div class="form-group input-group">
-                    <div style="flex:1;">
-                        <label class="form-label">ละติจูด</label>
-                        <input type="text" id="lat" class="form-input" value="" readonly>
-                    </div>
-                    <div style="flex:1;">
-                        <label class="form-label">ลองจิจูด</label>
-                        <input type="text" id="lon" class="form-input" value="" readonly>
-                    </div>
-                </div>
-                <div class="form-group input-group">
-                    <div style="flex:1;">
-                        <label class="form-label" for="electricity">ไฟฟ้า</label>
-                        <select id="electricity" class="form-input">
-                            <option value="มี">มี</option>
-                            <option value="ไม่มี" selected>ไม่มี</option>
-                        </select>
-                    </div>
-                    <div style="flex:1;">
-                        <label class="form-label" for="water">ประปา</label>
-                        <select id="water" class="form-input">
-                            <option value="มี">มี</option>
-                            <option value="ไม่มี" selected>ไม่มี</option>
-                        </select>
-                    </div>
-                    <div style="flex:1;">
-                        <label class="form-label" for="wifi">Wifi</label>
-                        <select id="wifi" class="form-input">
-                            <option value="มี">มี</option>
-                            <option value="ไม่มี" selected>ไม่มี</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group input-group">
-                    <div style="flex:1;">
-                        <label class="form-label" for="pet">รองรับสัตว์เลี้ยง</label>
-                        <select id="pet" class="form-input">
-                            <option value="มี">มี</option>
-                            <option value="ไม่มี" selected>ไม่มี</option>
-                        </select>
-                    </div>
-                    <div style="flex:1;">
-                        <label class="form-label" for="tent">สถานที่กางเต็นท์</label>
-                        <select id="tent" class="form-input">
-                            <option value="มี">มี</option>
-                            <option value="ไม่มี" selected>ไม่มี</option>
-                        </select>
-                    </div>
-                    <div style="flex:1;">
-                        <label class="form-label" for="toilet">สุขา (จำนวน)</label>
-                        <input type="text" id="toilet" class="form-input" placeholder="จำนวนสุขา">
-                </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="parking">ที่จอดรถ (จำนวน)</label>
-                    <input type="text" id="parking" class="form-input" placeholder="จำนวนที่จอดรถ">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="canSupport">รองรับผู้พักพิง (คน)</label>
-                    <input type="number" id="canSupport" class="form-input" min="0">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="currentSupport">จำนวนผู้พักพิง (คน)</label>
-                    <input type="number" id="currentSupport" class="form-input" min="0">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="status">สถานะ *</label>
-                    <select id="status" class="form-input" required>
-                        <option value="เปิด">เปิด</option>
-                        <option value="ปิด" selected>ปิด</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-form" id="addMarkerBtn">
-                    ✅ เพิ่มหมุดพร้อมข้อมูล
-                </button>
-            </form>
-
             <div class="btn-group">
                 <button type="button" class="btn-secondary" onclick="loadMarkersFromFirebase()">
                     🔄 โหลดข้อมูล Database
-                </button>
-                <button type="button" class="btn-secondary" onclick="clearAllMarkers()">
-                    🗑️ ลบทั้งหมด
                 </button>
             </div>
 
@@ -580,8 +560,8 @@
         window.orderBy = orderBy;
         window.updateDoc = updateDoc;
 
-        window.addEventListener('load', function() {
-            setTimeout(function() {
+        window.addEventListener('load', function () {
+            setTimeout(function () {
                 updateStatus('✅ Database พร้อมใช้งาน - เลื่อนแผนที่และเพิ่มหมุด', 5000);
                 loadMarkersFromFirebase();
             }, 1000);
@@ -598,6 +578,8 @@
         var radiusCircles = [];
         var infoWindowCloseTimeout;
         var statusTimeout;
+        var editingIndex = null;
+        var editingMarkerData = null;
 
         function init() {
             try {
@@ -641,67 +623,6 @@
                 }
             } catch (error) {
                 console.error('Error updating coordinates:', error);
-            }
-        }
-
-        async function fetchAddressFromLongdoAPI(lat, lon) {
-    try {
-        const apiKey = '417740672e7626cdcd09c2756d411dde';
-        const url = `https://api.longdo.com/map/services/address?lon=${lon}&lat=${lat}&noelevation=1&locale=th&key=${apiKey}`;
-        console.log('Calling Longdo Address API with URL:', url);
-        const response = await fetch(url);
-        const result = await response.json();
-        console.log('Longdo Address API Response:', result);
-
-        if (result) {
-            // ฟังก์ชันสำหรับลบตัวย่อ รวมถึง "เขต" และ "แขวง"
-            const cleanPrefix = (text) => {
-                if (text && typeof text === 'string') {
-                    if (text.startsWith('จ.')) {
-                        return text.substring(2).trim();
-                    } else if (text.startsWith('อ.')) {
-                        return text.substring(2).trim();
-                    } else if (text.startsWith('ต.')) {
-                        return text.substring(2).trim();
-                    } else if (text.startsWith('เขต')) { // เพิ่มเงื่อนไขสำหรับ "เขต"
-                        return text.substring(3).trim(); // ลบ 'เขต' (3 ตัวอักษร)
-                    } else if (text.startsWith('แขวง')) { // เพิ่มเงื่อนไขสำหรับ "แขวง"
-                        return text.substring(4).trim(); // ลบ 'แขวง' (4 ตัวอักษร)
-                    }
-                }
-                return text || '';
-            };
-
-            // เรียกใช้ cleanPrefix สำหรับแต่ละช่อง
-            document.getElementById('subdistrict').value = cleanPrefix(result.subdistrict);
-            document.getElementById('district').value = cleanPrefix(result.district);
-            document.getElementById('province').value = cleanPrefix(result.province);
-            document.getElementById('zipcode').value = result.postcode || '';
-
-            updateStatus('📍 ดึงที่อยู่สำเร็จ', 5000);
-        } else {
-            updateStatus('📍 ไม่พบที่อยู่จากพิกัดนี้', 5000);
-        }
-    } catch (error) {
-        console.error('Error fetching address:', error);
-        updateStatus('เกิดข้อผิดพลาดในการดึงข้อมูลที่อยู่: ' + error.message, 5000);
-    }
-}
-
-        function markCenterPosition() {
-            try {
-                const center = map.location();
-                currentLat = center.lat;
-                currentLon = center.lon;
-
-                document.getElementById('lat').value = currentLat;
-                document.getElementById('lon').value = currentLon;
-
-                fetchAddressFromLongdoAPI(currentLat, currentLon);
-
-            } catch (error) {
-                console.error('Error in markCenterPosition:', error);
-                updateStatus('❌ ไม่สามารถมาร์คตำแหน่งได้: ' + error.message, 5000);
             }
         }
 
@@ -767,11 +688,6 @@
             }
         }
 
-        document.getElementById('markerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            addMarkerWithData();
-        });
-
         function createMarker(lat, lon, name, address, active, capacity, markerId, markerIndex, extraData = {}) {
             let detail = `
                 <div style="padding: 10px; font-size: 14px; line-height: 1.6;">
@@ -787,8 +703,8 @@
                         ${extraData.zipcode ? `<tr><td style="padding: 4px 0; vertical-align: top;"><b>รหัสไปรษณีย์:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.zipcode}</td></tr>` : ''}
                         ${address ? `<tr><td style="padding: 4px 0; vertical-align: top;">📍 <b>สถานที่:</b></td><td style="padding: 4px 0; vertical-align: top;">${address}</td></tr>` : ''}
                         <tr><td style="padding: 4px 0; vertical-align: top;">🌍 <b>พิกัด:</b></td><td style="padding: 4px 0; vertical-align: top;">${lat.toFixed(6)}, ${lon.toFixed(6)}</td></tr>
-                        ${capacity ? `<tr><td style="padding: 4px 0; vertical-align: top;">👥 <b>รองรับ:</b></td><td style="padding: 4px 0; vertical-align: top;">${capacity.toLocaleString()} คน</td></tr>` : ''}
-                        ${extraData.currentSupport ? `<tr><td style="padding: 4px 0; vertical-align: top;">👤 <b>ผู้พักพิง:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.currentSupport} คน</td></tr>` : ''}
+                        ${capacity !== null && capacity !== undefined ? `<tr><td style="padding: 4px 0; vertical-align: top;">👥 <b>รองรับ:</b></td><td style="padding: 4px 0; vertical-align: top;">${capacity.toLocaleString()} คน</td></tr>` : ''}
+                        ${extraData.currentSupport !== null && extraData.currentSupport !== undefined ? `<tr><td style="padding: 4px 0; vertical-align: top;">👤 <b>ผู้พักพิง:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.currentSupport} คน</td></tr>` : ''}
                         ${extraData.parking ? `<tr><td style="padding: 4px 0; vertical-align: top;">🚗 <b>ที่จอดรถ:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.parking} คัน</td></tr>` : ''}
                         ${extraData.toilet ? `<tr><td style="padding: 4px 0; vertical-align: top;">🚻 <b>สุขา:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.toilet}</td></tr>` : ''}
                     </table>
@@ -830,7 +746,8 @@
             if (active) {
                 markerOptions.icon = { url: 'greenMarker.png', offset: { x: 0, y: -18 }, size: { w: 32, h: 32 } };
             } else {
-                markerOptions.icon = { url: 'redMarker.png', // สมมติว่าคุณมีไอคอนสีแดงสำหรับสถานะ 'ปิด'
+                markerOptions.icon = {
+                    url: 'redMarker.png', // สมมติว่าคุณมีไอคอนสีแดงสำหรับสถานะ 'ปิด'
                     offset: { x: 0, y: -18 }, size: { w: 32, h: 32 }
                 };
             }
@@ -842,7 +759,7 @@
 
             // เพิ่ม event hover เพื่อแสดง/ปิดป๊อปอัพ
             if (marker && marker.Event && typeof marker.Event.bind === 'function') {
-                marker.Event.bind('OverlayHover', function() {
+                marker.Event.bind('OverlayHover', function () {
                     // console.log('OverlayHover fired for marker:', name, 'ID:', markerId);
                     if (infoWindowCloseTimeout) {
                         clearTimeout(infoWindowCloseTimeout);
@@ -851,7 +768,7 @@
                     map.InfoWindow.open(marker);
                 });
 
-                marker.Event.bind('OverlayLeave', function() {
+                marker.Event.bind('OverlayLeave', function () {
                     // console.log('OverlayLeave fired for marker:', name, 'ID:', markerId);
                     if (infoWindowCloseTimeout) {
                         clearTimeout(infoWindowCloseTimeout);
@@ -862,7 +779,7 @@
                 });
 
                 // ทิ้ง Event 'click' ไว้เพื่อเปรียบเทียบว่ายังทำงานปกติหรือไม่
-                marker.Event.bind('click', function() {
+                marker.Event.bind('click', function () {
                     // console.log('Click event fired for marker:', name, 'ID:', markerId);
                     map.InfoWindow.open(marker);
                 });
@@ -873,29 +790,29 @@
         async function addMarkerWithData() {
             try {
                 // ดึงค่าทุกฟิลด์จากฟอร์ม
-                var shelterType = document.getElementById('shelterType').value;
+                var shelterType = document.getElementById('edit_shelterType').value;
                 if (!["ตามแผน", "นอกแผน", "อื่นๆ"].includes(shelterType)) shelterType = '';
-                var name = document.getElementById('fullName').value.trim();
-                var phone = document.getElementById('phone').value.trim();
-                var region = document.getElementById('region').value;
-                var province = document.getElementById('province').value.trim();
-                var district = document.getElementById('district').value.trim();
-                var subdistrict = document.getElementById('subdistrict').value.trim();
-                var village = document.getElementById('village').value.trim();
-                var zipcode = document.getElementById('zipcode').value.trim();
-                var place = document.getElementById('place').value.trim();
-                var lat = document.getElementById('lat').value;
-                var lon = document.getElementById('lon').value;
-                var electricity = document.getElementById('electricity').value;
-                var water = document.getElementById('water').value;
-                var wifi = document.getElementById('wifi').value;
-                var pet = document.getElementById('pet').value;
-                var tent = document.getElementById('tent').value;
-                var toilet = document.getElementById('toilet').value.trim();
-                var parking = document.getElementById('parking').value.trim();
-                var canSupport = document.getElementById('canSupport').value;
-                var currentSupport = document.getElementById('currentSupport').value;
-                var status = document.getElementById('status').value;
+                var name = document.getElementById('edit_fullName').value.trim();
+                var phone = document.getElementById('edit_phone').value.trim();
+                var region = document.getElementById('edit_region').value;
+                var province = document.getElementById('edit_province').value.trim();
+                var district = document.getElementById('edit_district').value.trim();
+                var subdistrict = document.getElementById('edit_subdistrict').value.trim();
+                var village = document.getElementById('edit_village').value.trim();
+                var zipcode = document.getElementById('edit_zipcode').value.trim();
+                var place = document.getElementById('edit_place').value.trim();
+                var lat = document.getElementById('edit_lat').value;
+                var lon = document.getElementById('edit_lon').value;
+                var electricity = document.getElementById('edit_electricity').value;
+                var water = document.getElementById('edit_water').value;
+                var wifi = document.getElementById('edit_wifi').value;
+                var pet = document.getElementById('edit_pet').value;
+                var tent = document.getElementById('edit_tent').value;
+                var toilet = document.getElementById('edit_toilet').value.trim();
+                var parking = document.getElementById('edit_parking').value.trim();
+                var canSupport = document.getElementById('edit_canSupport').value;
+                var currentSupport = document.getElementById('edit_currentSupport').value;
+                var status = document.getElementById('edit_status').value;
                 if (!status) status = 'เปิด';
                 var active = (status === 'เปิด');
 
@@ -1001,32 +918,6 @@
             }
         }
 
-        async function clearAllMarkers() {
-            try {
-                if (confirm('คุณแน่ใจหรือไม่ที่จะลบหมุดทั้งหมด? การดำเนินการนี้ไม่สามารถยกเลิกได้!')) {
-                    updateStatus('🗑️ กำลังลบหมุดทั้งหมด...', 0);
-                    const markersCol = window.collection(window.db, 'markers');
-                    const querySnapshot = await window.getDocs(markersCol);
-
-                    for (const docSnapshot of querySnapshot.docs) {
-                        await window.deleteDoc(window.doc(window.db, 'markers', docSnapshot.id));
-                    }
-                    // Remove all markers from the map and clear the local array
-                    markers.forEach(markerData => {
-                        if (markerData.marker) {
-                            map.Overlays.remove(markerData.marker);
-                        }
-                    });
-                    markers = [];
-                    updateMarkersList();
-                    updateStatus('✅ ลบหมุดทั้งหมดเรียบร้อยแล้ว!', 5000);
-                }
-            } catch (error) {
-                updateStatus('❌ เกิดข้อผิดพลาดในการลบหมุด: ' + error.message, 5000);
-                console.error('Error clearing all markers:', error);
-            }
-        }
-
         function updateMarkersList() {
             var markersListDiv = document.getElementById('markersList');
             var markerCountSpan = document.getElementById('markerCount');
@@ -1057,7 +948,7 @@
                             <div class="marker-details">
                                 ${markerData.subdistrict || ''} ${markerData.district || ''} ${markerData.province || ''} ${markerData.zipcode || ''}<br>
                                 พิกัด: ${markerData.lat.toFixed(6)}, ${markerData.lon.toFixed(6)}<br>
-                                รองรับ: ${markerData.capacity ? markerData.capacity.toLocaleString() : 'N/A'} คน (ปัจจุบัน: ${markerData.currentSupport ? markerData.currentSupport.toLocaleString() : 'N/A'} คน)<br>
+                                รองรับ: ${markerData.capacity !== null && markerData.capacity !== undefined ? markerData.capacity.toLocaleString() : 'N/A'} คน (ปัจจุบัน: ${markerData.currentSupport !== null && markerData.currentSupport !== undefined ? markerData.currentSupport.toLocaleString() : 'N/A'} คน)<br>
                                 เพิ่มเมื่อ: ${markerData.createdAt}
                             </div>
                         </div>
@@ -1080,7 +971,7 @@
                     </div>
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
                         <button class="btn-secondary" style="flex:1;" onclick="map.location({ lat: ${markerData.lat}, lon: ${markerData.lon} }, true, 16);">ดูบนแผนที่</button>
-                        <button class="btn-secondary" style="background-color: #3b82f6; flex:1;" onclick="editMarker('${markerData.id}', ${index})">แก้ไข</button>
+                        <button class="btn-secondary" style="background-color: #3b82f6; flex:1;" onclick="editMarkerFromPopup('${markerData.id}', ${index})">แก้ไข</button>
                         <button class="btn-secondary" style="background-color: #10b981; flex:1;" onclick="getDirections(${markerData.lat}, ${markerData.lon})">เส้นทาง</button>
                         <button class="btn-secondary" style="background-color: #ef4444; flex:1;" onclick="deleteMarker('${markerData.id}', ${index})">ลบ</button>
                     </div>
@@ -1132,50 +1023,6 @@
                 updateStatus('❌ เกิดข้อผิดพลาดในการอัปเดตสถานะ: ' + error.message, 5000);
                 console.error('Error updating marker status:', error);
             }
-        }
-
-        function editMarker(markerId, index) {
-            const markerData = markers.find(m => m.id === markerId);
-            if (!markerData) {
-                updateStatus('ไม่พบข้อมูลหมุดที่จะแก้ไข', 5000);
-                return;
-            }
-
-            // Populate the form with existing data
-            document.getElementById('shelterType').value = markerData.shelterType || '';
-            document.getElementById('fullName').value = markerData.name || '';
-            document.getElementById('phone').value = markerData.phone || '';
-            document.getElementById('region').value = markerData.region || '';
-            document.getElementById('province').value = markerData.province || '';
-            document.getElementById('district').value = markerData.district || '';
-            document.getElementById('subdistrict').value = markerData.subdistrict || '';
-            document.getElementById('village').value = markerData.village || '';
-            document.getElementById('zipcode').value = markerData.zipcode || '';
-            document.getElementById('place').value = markerData.address || '';
-            document.getElementById('lat').value = markerData.lat;
-            document.getElementById('lon').value = markerData.lon;
-            document.getElementById('electricity').value = markerData.electricity || 'ไม่มี';
-            document.getElementById('water').value = markerData.water || 'ไม่มี';
-            document.getElementById('wifi').value = markerData.wifi || 'ไม่มี';
-            document.getElementById('pet').value = markerData.pet || 'ไม่มี';
-            document.getElementById('tent').value = markerData.tent || 'ไม่มี';
-            document.getElementById('toilet').value = markerData.toilet || '';
-            document.getElementById('parking').value = markerData.parking || '';
-            document.getElementById('canSupport').value = markerData.capacity || '';
-            document.getElementById('currentSupport').value = markerData.currentSupport || '';
-            document.getElementById('status').value = markerData.active ? 'เปิด' : 'ปิด';
-
-            // Change form button to update mode
-            var addBtn = document.getElementById('addMarkerBtn');
-            addBtn.textContent = '✏️ อัปเดตหมุด';
-            addBtn.onclick = function() {
-                updateMarker(markerId, index);
-            };
-            addBtn.style.background = 'linear-gradient(135deg, #3b82f6, #60a5fa)'; // Blue gradient
-
-            // Scroll to the top of the form section
-            document.querySelector('.form-section').scrollTop = 0;
-            updateStatus(`📝 กำลังแก้ไขหมุด: ${markerData.name}`, 5000);
         }
 
         async function updateMarker(markerId, index) {
@@ -1272,7 +1119,7 @@
 
                 // Reset form button to add mode
                 updateBtn.textContent = '✅ เพิ่มหมุดพร้อมข้อมูล';
-                updateBtn.onclick = function() {
+                updateBtn.onclick = function () {
                     addMarkerWithData();
                 };
                 updateBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)'; // Green gradient
@@ -1288,13 +1135,506 @@
         }
 
         function editMarkerFromPopup(markerId, index) {
-            map.InfoWindow.close(); // Close the info window
-            editMarker(markerId, index); // Call the main edit function
+            if (map && map.InfoWindow && typeof map.InfoWindow.close === 'function') {
+                map.InfoWindow.close();
+            }
+            const markerData = markers.find(m => m.id === markerId);
+            if (!markerData) return;
+            openEditModal(markerData, index);
         }
 
+        function openEditModal(markerData, index) {
+            editingIndex = index;
+            editingMarkerData = markerData;
+
+            // ใส่ข้อมูลเดิมลงในฟอร์มแก้ไข
+            document.getElementById('edit_shelterType').value = markerData.shelterType || '';
+            document.getElementById('edit_fullName').value = markerData.name || '';
+            document.getElementById('edit_phone').value = markerData.phone || '';
+            document.getElementById('edit_region').value = markerData.region || '';
+            document.getElementById('edit_province').value = markerData.province || '';
+            document.getElementById('edit_district').value = markerData.district || '';
+            document.getElementById('edit_subdistrict').value = markerData.subdistrict || '';
+            document.getElementById('edit_village').value = markerData.village || '';
+            document.getElementById('edit_zipcode').value = markerData.zipcode || '';
+            document.getElementById('edit_place').value = markerData.address || '';
+            document.getElementById('edit_lat').value = markerData.lat || '';
+            document.getElementById('edit_lon').value = markerData.lon || '';
+            document.getElementById('edit_electricity').value = markerData.electricity || 'ไม่มี';
+            document.getElementById('edit_water').value = markerData.water || 'ไม่มี';
+            document.getElementById('edit_wifi').value = markerData.wifi || 'ไม่มี';
+            document.getElementById('edit_pet').value = markerData.pet || 'ไม่มี';
+            document.getElementById('edit_tent').value = markerData.tent || 'ไม่มี';
+            document.getElementById('edit_toilet').value = markerData.toilet || '';
+            document.getElementById('edit_parking').value = markerData.parking || '';
+            document.getElementById('edit_canSupport').value = markerData.capacity || '';
+            document.getElementById('edit_currentSupport').value = markerData.currentSupport || '';
+            document.getElementById('edit_status').value = markerData.active ? 'เปิด' : 'ปิด';
+
+            // เปลี่ยนหัวข้อ popup เป็นโหมดแก้ไข
+            document.querySelector('.edit-modal-header').textContent = '✏️ แก้ไขข้อมูลศูนย์พักพิง';
+
+            // ปุ่มบันทึกเป็นโหมดแก้ไข
+            const saveBtn = document.querySelector('#editMarkerForm button[type="submit"]');
+            if (saveBtn) {
+                saveBtn.textContent = '💾 บันทึกการแก้ไข';
+            }
+
+            // เปิด modal
+            document.getElementById('editModal').classList.add('edit-modal');
+            document.getElementById('editModal').style.display = 'flex';
+
+            // เปิดแผนที่แก้ไขที่พิกัดเดิม
+            setTimeout(() => {
+        const editMapContainer = document.getElementById('editMap');
+        if (editMapContainer && editMapContainer.offsetWidth > 0) {
+            const lat = parseFloat(markerData.lat);
+            const lon = parseFloat(markerData.lon);
+            if (!isNaN(lat) && !isNaN(lon)) {
+                initEditMap(lat, lon);
+            }
+        } else {
+            // ลองใหม่หลัง 500ms
+            setTimeout(() => initEditMap(parseFloat(markerData.lat), parseFloat(markerData.lon)), 500);
+        }
+    }, 300);
+}
+
+        function openCreateModal() {
+            editingIndex = null;
+            editingMarkerData = null;
+
+            // ล้างค่าทุก input ใน modal
+            const fields = [
+                'edit_shelterType', 'edit_fullName', 'edit_phone', 'edit_region', 'edit_province',
+                'edit_district', 'edit_subdistrict', 'edit_village', 'edit_zipcode', 'edit_place',
+                'edit_lat', 'edit_lon', 'edit_electricity', 'edit_water', 'edit_wifi', 'edit_pet',
+                'edit_tent', 'edit_toilet', 'edit_parking', 'edit_canSupport', 'edit_currentSupport', 'edit_status'
+            ];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+                    else el.value = '';
+                }
+            });
+
+            // เปลี่ยนหัวข้อ popup ให้เป็น เพิ่มศูนย์พักพิงใหม่
+            document.querySelector('.edit-modal-header').textContent = '➕ เพิ่มศูนย์พักพิงใหม่';
+
+            // เปลี่ยนปุ่มบันทึกให้เป็นโหมดสร้างใหม่
+            const saveBtn = document.querySelector('#editMarkerForm button[type="submit"]');
+            if (saveBtn) {
+                saveBtn.textContent = '✅ สร้างศูนย์พักพิงใหม่';
+                saveBtn.id = 'addMarkerBtn'; // เพิ่มบรรทัดนี้เพื่อตั้งค่า id
+            }
+
+            // เปิด modal
+            document.getElementById('editModal').classList.add('edit-modal');
+            document.getElementById('editModal').style.display = 'flex';
+
+            // เซ็ตแผนที่เริ่มต้นที่ตำแหน่งกึ่งกลาง map หลัก
+            setTimeout(() => {
+                const center = map.location();
+                initEditMap(center.lat, center.lon);
+            }, 300);
+        }
+
+        // ตัวแปรสำหรับแผนที่แก้ไข
+        var editMap = null;
+        var editCurrentMarker = null;
+
+        // ฟังก์ชัน initEditMap ที่แก้ไขแล้ว
+function initEditMap(lat, lon) {
+    try {
+        console.log('Initializing edit map at coordinates:', lat, lon);
+
+        // ตรวจสอบว่า longdo API พร้อมใช้งาน
+        if (typeof longdo === 'undefined' || !longdo.Map) {
+            console.error('Longdo Map API not loaded yet');
+            // ลองใหม่หลัง 1 วินาที
+            setTimeout(() => initEditMap(lat, lon), 1000);
+            return;
+        }
+
+        const editMapContainer = document.getElementById('editMap');
+        if (!editMapContainer) {
+            console.error('Edit map container not found');
+            return;
+        }
+
+        // ตรวจสอบว่า container มีขนาดที่เหมาะสม
+        if (editMapContainer.offsetWidth === 0 || editMapContainer.offsetHeight === 0) {
+            console.warn('Edit map container has no dimensions, retrying...');
+            setTimeout(() => initEditMap(lat, lon), 500);
+            return;
+        }
+
+        // ลบแผนที่เก่าถ้ามี
+        if (editMap) {
+            try {
+                editMap.destroy();
+            } catch (e) {
+                console.warn('Could not destroy previous edit map:', e);
+            }
+            editMap = null;
+        }
+
+        // สร้างแผนที่ใหม่พร้อมการตั้งค่าที่ปลอดภัย
+        editMap = new longdo.Map({
+            placeholder: editMapContainer,
+            language: 'th'
+        });
+
+        // รอให้แผนที่โหลดเสร็จก่อนตั้งค่าตำแหน่ง
+        setTimeout(() => {
+            try {
+                if (editMap && typeof editMap.location === 'function') {
+                    editMap.location({ lon: lon, lat: lat });
+                    editMap.zoom(15);
+
+                    // เพิ่ม marker ที่ตำแหน่งเดิม
+                    if (editCurrentMarker) {
+                        try {
+                            editMap.Overlays.remove(editCurrentMarker);
+                        } catch (e) {
+                            console.warn('Could not remove previous marker:', e);
+                        }
+                    }
+
+                    editCurrentMarker = new longdo.Marker({ lon: lon, lat: lat }, {
+                        title: 'ตำแหน่งปัจจุบัน',
+                        detail: 'คลิกเพื่อเลือกตำแหน่งใหม่',
+                        icon: {
+                            url: 'https://api.longdo.com/mmmap/images/pin_mark.png',
+                            offset: { x: 12, y: 45 }
+                        }
+                    });
+
+                    editMap.Overlays.add(editCurrentMarker);
+
+                    // เพิ่ม event listener สำหรับการคลิกบนแผนที่
+                    editMap.Event.bind('click', function (location) {
+                        try {
+                            if (editCurrentMarker && location) {
+                                // ย้าย marker ไปยังตำแหน่งใหม่
+                                editCurrentMarker.location({ lon: location.lon, lat: location.lat });
+
+                                // อัปเดตค่าใน input fields
+                                const latInput = document.getElementById('edit_lat');
+                                const lonInput = document.getElementById('edit_lon');
+                                
+                                if (latInput) latInput.value = location.lat.toFixed(6);
+                                if (lonInput) lonInput.value = location.lon.toFixed(6);
+
+                                console.log('Marker moved to:', location.lat.toFixed(6), location.lon.toFixed(6));
+                                updateStatus(`📍 เลือกตำแหน่งใหม่: ${location.lat.toFixed(6)}, ${location.lon.toFixed(6)}`, 3000);
+                            }
+                        } catch (clickError) {
+                            console.error('Error handling map click:', clickError);
+                        }
+                    });
+
+                    console.log('Edit map initialized successfully');
+                    updateStatus('✅ แผนที่แก้ไขพร้อมใช้งาน', 3000);
+                }
+            } catch (setupError) {
+                console.error('Error setting up edit map:', setupError);
+                updateStatus('❌ เกิดข้อผิดพลาดในการตั้งค่าแผนที่แก้ไข', 3000);
+            }
+        }, 500);
+
+    } catch (error) {
+        console.error('Error initializing edit map:', error);
+        updateStatus('❌ เกิดข้อผิดพลาดในการสร้างแผนที่แก้ไข', 3000);
+        
+        // ลองใหม่อีกครั้งหลัง 2 วินาที
+        setTimeout(() => {
+            console.log('Retrying edit map initialization...');
+            initEditMap(lat, lon);
+        }, 2000);
+    }
+}
+
+        async function fetchAddressForEdit(lat, lon) {
+            try {
+                console.log('fetchAddressForEdit called with:', lat, lon); // Debug
+
+                const apiKey = '417740672e7626cdcd09c2756d411dde';
+                const url = `https://api.longdo.com/map/services/address?lon=${lon}&lat=${lat}&noelevation=1&locale=th&key=${apiKey}`;
+                console.log('API URL:', url); // Debug
+
+                const response = await fetch(url);
+                const result = await response.json();
+                console.log('API Response:', result); // Debug
+
+                if (result) {
+                    const cleanPrefix = (text) => {
+                        if (text && typeof text === 'string') {
+                            if (text.startsWith('จ.')) return text.substring(2).trim();
+                            else if (text.startsWith('อ.')) return text.substring(2).trim();
+                            else if (text.startsWith('ต.')) return text.substring(2).trim();
+                            else if (text.startsWith('เขต')) return text.substring(3).trim();
+                            else if (text.startsWith('แขวง')) return text.substring(4).trim();
+                        }
+                        return text || '';
+                    };
+
+                    // จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์
+                    const provinceName = cleanPrefix(result.province);
+
+                    // เช็คว่า element มีอยู่จริงหรือไม่
+                    const elements = {
+                        subdistrict: document.getElementById('edit_subdistrict'),
+                        district: document.getElementById('edit_district'),
+                        province: document.getElementById('edit_province'),
+                        zipcode: document.getElementById('edit_zipcode'),
+                        region: document.getElementById('edit_region')
+                    };
+
+                    console.log('Form elements found:', elements); // Debug
+
+                    if (elements.subdistrict) elements.subdistrict.value = cleanPrefix(result.subdistrict);
+                    if (elements.district) elements.district.value = cleanPrefix(result.district);
+                    if (elements.province) elements.province.value = provinceName;
+                    if (elements.zipcode) elements.zipcode.value = result.postcode || '';
+
+                    // เซ็ตภาคตามจังหวัด
+                    const regionMap = {
+                        'เหนือ': ['เชียงใหม่', 'เชียงราย', 'ลำปาง', 'ลำพูน', 'แพร่', 'น่าน', 'พะเยา', 'แม่ฮ่องสอน', 'ตาก', 'กำแพงเพชร', 'สุโขทัย', 'พิษณุโลก', 'พิจิตร', 'เพชรบูรณ์', 'อุตรดิตถ์'],
+                        'กลาง': ['กรุงเทพมหานคร', 'นนทบุรี', 'ปทุมธานี', 'สมุทรปราการ', 'นครปฐม', 'สมุทรสาคร', 'อ่างทอง', 'ลพบุรี', 'สิงห์บุรี', 'ชัยนาท', 'สระบุรี', 'พระนครศรีอยุธยา', 'สุพรรณบุรี'],
+                        'ตะวันออก': ['ชลบุรี', 'ระยอง', 'จันทบุรี', 'ตราด', 'สระแก้ว', 'ปราจีนบุรี', 'นครนายก'],
+                        'ตะวันตก': ['กาญจนบุรี', 'ราชบุรี', 'เพชรบุรี', 'ประจวบคีรีขันธ์'],
+                        'ตะวันออกเฉียงเหนือ': ['นครราชสีมา', 'ขอนแก่น', 'อุดรธานี', 'อุบลราชธานี', 'ศรีสะเกษ', 'สุรินทร์', 'บุรีรัมย์', 'มหาสารคาม', 'ร้อยเอ็ด', 'ยโสธร', 'นครพนม', 'สกลนคร', 'มุกดาหาร', 'กาฬสินธุ์', 'หนองบัวลำภู', 'หนองคาย', 'บึงกาฬ', 'ชัยภูมิ', 'เลย', 'อำนาจเจริญ'],
+                        'ใต้': ['สงขลา', 'สตูล', 'พัทลุง', 'ตรัง', 'กระบี่', 'ภูเก็ต', 'ระนอง', 'ชุมพร', 'นครศรีธรรมราช', 'สุราษฎร์ธานี', 'นราธิวาส', 'ยะลา', 'ปัตตานี']
+                    };
+
+                    let regionName = '';
+                    for (const [region, provinces] of Object.entries(regionMap)) {
+                        if (provinces.includes(provinceName)) {
+                            regionName = region;
+                            break;
+                        }
+                    }
+
+                    if (regionName && elements.region) {
+                        elements.region.value = regionName;
+                        console.log('Region set to:', regionName); // Debug
+                    }
+
+                    updateStatus('📍 ดึงที่อยู่สำเร็จ', 3000);
+                } else {
+                    console.log('No result from API'); // Debug
+                    updateStatus('📍 ไม่พบที่อยู่จากพิกัดนี้', 3000);
+                }
+            } catch (error) {
+                console.error('Error fetching address for edit:', error);
+                updateStatus('❌ ดึงข้อมูลที่อยู่ล้มเหลว: ' + error.message, 3000);
+            }
+        }
+
+
+        // ฟังก์ชันเลือกตำแหน่งปัจจุบันที่แก้ไขแล้ว
+function selectCurrentLocation() {
+    try {
+        if (!editMap || typeof editMap.location !== 'function') {
+            updateStatus('❌ แผนที่แก้ไขยังไม่พร้อมใช้งาน', 3000);
+            return;
+        }
+
+        const center = editMap.location();
+        if (!center || typeof center.lat === 'undefined' || typeof center.lon === 'undefined') {
+            updateStatus('❌ ไม่พบพิกัดกึ่งกลางของแผนที่', 3000);
+            return;
+        }
+
+        // กรอก lat/lon ลงฟอร์ม
+        const latInput = document.getElementById('edit_lat');
+        const lonInput = document.getElementById('edit_lon');
+        
+        if (latInput) latInput.value = center.lat.toFixed(6);
+        if (lonInput) lonInput.value = center.lon.toFixed(6);
+
+        // ย้าย marker ไปยังตำแหน่งใหม่
+        if (editCurrentMarker) {
+            try {
+                editCurrentMarker.location({ lon: center.lon, lat: center.lat });
+            } catch (markerError) {
+                console.warn('Could not move marker:', markerError);
+            }
+        }
+
+        // ดึงที่อยู่และใส่ข้อมูลฟอร์ม
+        fetchAddressForEdit(center.lat, center.lon);
+
+        updateStatus(`📍 เลือกพิกัดใหม่: ${center.lat.toFixed(6)}, ${center.lon.toFixed(6)}`, 3000);
+    } catch (error) {
+        console.error('Error selecting current location:', error);
+        updateStatus('❌ เกิดข้อผิดพลาดในการเลือกตำแหน่ง', 3000);
+    }
+}
+
+// ฟังก์ชันปิด modal ที่แก้ไขแล้ว
+function closeEditModal() {
+    try {
+        const modal = document.getElementById('editModal');
+        if (modal) {
+            modal.classList.remove('edit-modal');
+            modal.style.display = 'none';
+        }
+
+        // ล้างข้อมูลการแก้ไข
+        editingIndex = null;
+        editingMarkerData = null;
+
+        // ล้างแผนที่แก้ไขอย่างปลอดภัย
+        if (editMap) {
+            try {
+                if (editCurrentMarker) {
+                    editMap.Overlays.remove(editCurrentMarker);
+                }
+                editMap.destroy();
+            } catch (e) {
+                console.warn('Error destroying edit map:', e);
+            }
+            editMap = null;
+        }
+        
+        editCurrentMarker = null;
+
+        updateStatus('📝 ปิดหน้าต่างแก้ไขแล้ว', 3000);
+    } catch (error) {
+        console.error('Error closing edit modal:', error);
+    }
+}
+
+
+
+        // เพิ่ม event listener สำหรับฟอร์มแก้ไขและสร้างใหม่หลังจาก DOM โหลดเสร็จแล้ว
+        document.addEventListener('DOMContentLoaded', function () {
+            const editMarkerForm = document.getElementById('editMarkerForm');
+            if (editMarkerForm) {
+                editMarkerForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    // ดึงค่าจากฟอร์ม
+                    const name = document.getElementById('edit_fullName').value.trim();
+                    const lat = parseFloat(document.getElementById('edit_lat').value);
+                    const lon = parseFloat(document.getElementById('edit_lon').value);
+                    const shelterType = document.getElementById('edit_shelterType').value;
+                    const phone = document.getElementById('edit_phone').value.trim();
+                    const region = document.getElementById('edit_region').value;
+                    const province = document.getElementById('edit_province').value.trim();
+                    const district = document.getElementById('edit_district').value.trim();
+                    const subdistrict = document.getElementById('edit_subdistrict').value.trim();
+                    const village = document.getElementById('edit_village').value.trim();
+                    const zipcode = document.getElementById('edit_zipcode').value.trim();
+                    const place = document.getElementById('edit_place').value.trim();
+                    const electricity = document.getElementById('edit_electricity').value;
+                    const water = document.getElementById('edit_water').value;
+                    const wifi = document.getElementById('edit_wifi').value;
+                    const pet = document.getElementById('edit_pet').value;
+                    const tent = document.getElementById('edit_tent').value;
+                    const toilet = document.getElementById('edit_toilet').value.trim();
+                    const parking = document.getElementById('edit_parking').value.trim();
+                    const canSupport = document.getElementById('edit_canSupport').value;
+                    const currentSupport = document.getElementById('edit_currentSupport').value;
+                    const status = document.getElementById('edit_status').value;
+                    const active = (status === 'เปิด');
+
+                    // validate
+                    if (!name) {
+                        updateStatus('❌ กรุณากรอกชื่อ-สกุล', 3000);
+                        alert('กรุณากรอกชื่อ-สกุล');
+                        return;
+                    }
+
+                    // **เช็คว่าเป็นโหมดเพิ่มใหม่หรือแก้ไข**
+                    if (editingIndex === null) {
+                        // ------------------------
+                        // โหมด "เพิ่มศูนย์พักพิงใหม่"
+                        // ------------------------
+                        await addMarkerWithData();  // ฟังก์ชันเดิมที่บันทึกลง database และสร้างหมุดใหม่
+                        closeEditModal();
+                        updateStatus("✅ เพิ่มศูนย์พักพิงใหม่สำเร็จ!", 5000);
+                        return;
+                    }
+
+                    // ------------------------
+                    // โหมด "แก้ไขศูนย์พักพิง"
+                    // ------------------------
+                    try {
+                        const updatedData = {
+                            shelterType: shelterType || '',
+                            name: name,
+                            phone: phone || '',
+                            region: region || '',
+                            province: province || '',
+                            district: district || '',
+                            subdistrict: subdistrict || '',
+                            village: village || '',
+                            zipcode: zipcode || '',
+                            address: place || '',
+                            lat: lat,
+                            lon: lon,
+                            electricity: electricity || '',
+                            water: water || '',
+                            wifi: wifi || '',
+                            pet: pet || '',
+                            tent: tent || '',
+                            toilet: toilet || '',
+                            parking: parking || '',
+                            capacity: canSupport ? parseInt(canSupport) : null,
+                            currentSupport: currentSupport ? parseInt(currentSupport) : null,
+                            active: active,
+                            updatedAt: new Date()
+                        };
+
+                        const markerId = markers[editingIndex].id;
+                        const markerRef = window.doc(window.db, 'markers', markerId);
+
+                        // update ข้อมูลใน Firestore
+                        await window.updateDoc(markerRef, updatedData);
+
+                        // ลบ marker เก่าบนแผนที่
+                        if (markers[editingIndex].marker) {
+                            map.Overlays.remove(markers[editingIndex].marker);
+                        }
+
+                        // สร้าง marker ใหม่
+                        const newMarker = createMarker(
+                            lat, lon, name, place, active, updatedData.capacity,
+                            markerId, editingIndex, updatedData
+                        );
+                        map.Overlays.add(newMarker);
+
+                        // update array markers
+                        markers[editingIndex] = {
+                            ...markers[editingIndex],
+                            ...updatedData,
+                            marker: newMarker
+                        };
+
+                        updateMarkersList();
+                        updateStatus("✅ บันทึกการแก้ไขข้อมูลสำเร็จ!", 5000);
+                        closeEditModal();
+                    } catch (err) {
+                        console.error('Error updating marker:', err);
+                        updateStatus('❌ เกิดข้อผิดพลาดในการแก้ไข: ' + err.message, 5000);
+                        alert("เกิดข้อผิดพลาดในการอัปเดต: " + err.message);
+                    }
+                });
+            } else {
+                console.error('editMarkerForm element not found');
+            }
+        });
+
+
         async function deleteMarkerFromPopup(markerId, index) {
-            map.InfoWindow.close(); // Close the info window
-            await deleteMarker(markerId, index); // Call the main delete function
+            if (map && map.InfoWindow && typeof map.InfoWindow.close === 'function') {
+                map.InfoWindow.close();
+            }
+            await deleteMarker(markerId, index); // เรียกฟังก์ชันลบหลัก
         }
 
         function clearForm() {
@@ -1329,13 +1669,13 @@
         // ฟังก์ชันสำหรับเปิด Google Maps เพื่อดูเส้นทาง
         function getDirections(lat, lon) {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
+                navigator.geolocation.getCurrentPosition(function (position) {
                     const originLat = position.coords.latitude;
                     const originLon = position.coords.longitude;
                     // ใช้ domain ที่อนุญาตสำหรับ Google Maps
                     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLon}&destination=${lat},${lon}&travelmode=driving`;
                     window.open(googleMapsUrl, '_blank');
-                }, function(error) {
+                }, function (error) {
                     alert('ไม่สามารถระบุตำแหน่งปัจจุบันของคุณได้: ' + error.message);
                     // Fallback: open without origin
                     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
@@ -1348,6 +1688,187 @@
                 window.open(googleMapsUrl, '_blank');
             }
         }
+
+
+
     </script>
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h2 class="edit-modal-header">✏️ แก้ไขข้อมูลศูนย์พักพิง</h2>
+            <button onclick="closeEditModal()" class="edit-modal-close">✕</button>
+
+            <div class="edit-grid">
+                <!-- ฟอร์มแก้ไข -->
+                <div class="edit-form-section">
+                    <form id="editMarkerForm">
+                        <div class="form-group">
+                            <label class="form-label" for="edit_shelterType">ประเภทศูนย์พักพิง *</label>
+                            <select id="edit_shelterType" class="form-input" required>
+                                <option value="">-- เลือกประเภท --</option>
+                                <option value="ตามแผน">ตามแผน</option>
+                                <option value="นอกแผน">นอกแผน</option>
+                                <option value="อื่นๆ">อื่นๆ</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_fullName">ชื่อ-สกุล *</label>
+                            <input type="text" id="edit_fullName" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_phone">หมายเลขโทรศัพท์ *</label>
+                            <input type="text" id="edit_phone" class="form-input" required pattern="[0-9]{9,10}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_region">ภาค *</label>
+                            <select id="edit_region" class="form-input" required>
+                                <option value="">-- เลือกภาค --</option>
+                                <option value="เหนือ">เหนือ</option>
+                                <option value="กลาง">กลาง</option>
+                                <option value="ตะวันออกเฉียงเหนือ">ตะวันออกเฉียงเหนือ</option>
+                                <option value="ตะวันออก">ตะวันออก</option>
+                                <option value="ตะวันตก">ตะวันตก</option>
+                                <option value="ใต้">ใต้</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_province">จังหวัด *</label>
+                            <input type="text" id="edit_province" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_district">เขต/อำเภอ *</label>
+                            <input type="text" id="edit_district" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_subdistrict">แขวง/ตำบล *</label>
+                            <input type="text" id="edit_subdistrict" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_village">หมู่บ้าน</label>
+                            <input type="text" id="edit_village" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_zipcode">รหัสไปรษณีย์</label>
+                            <input type="text" id="edit_zipcode" class="form-input" pattern="[0-9]{5}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_place">สถานที่</label>
+                            <input type="text" id="edit_place" class="form-input">
+                        </div>
+
+                        <div class="form-group input-group">
+                            <div style="flex:1;">
+                                <label class="form-label">ละติจูด</label>
+                                <input type="text" id="edit_lat" class="form-input" placeholder="ละติจูด">
+                            </div>
+                            <div style="flex:1;">
+                                <label class="form-label">ลองจิจูด</label>
+                                <input type="text" id="edit_lon" class="form-input" placeholder="ลองจิจูด">
+                            </div>
+                        </div>
+
+                        <!-- แผนที่สำหรับเลือกตำแหน่งใหม่ -->
+                        <div class="form-group">
+                            <label class="form-label">แผนที่สำหรับเลือกตำแหน่งใหม่</label>
+                            <div id="editMapContainer" class="edit-map-container">
+                                <div id="editMap" class="edit-map"></div>
+                            </div>
+                            <button type="button" class="btn-form"
+                                style="margin-top:10px;background:linear-gradient(135deg,#dc2626,#ef4444);"
+                                onclick="selectCurrentLocation()">
+                                📍 เลือกจุดนี้
+                            </button>
+                        </div>
+
+
+
+                        <div class="form-group input-group">
+                            <div style="flex:1;">
+                                <label class="form-label" for="edit_electricity">ไฟฟ้า</label>
+                                <select id="edit_electricity" class="form-input">
+                                    <option value="มี">มี</option>
+                                    <option value="ไม่มี">ไม่มี</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;">
+                                <label class="form-label" for="edit_water">ประปา</label>
+                                <select id="edit_water" class="form-input">
+                                    <option value="มี">มี</option>
+                                    <option value="ไม่มี">ไม่มี</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;">
+                                <label class="form-label" for="edit_wifi">Wifi</label>
+                                <select id="edit_wifi" class="form-input">
+                                    <option value="มี">มี</option>
+                                    <option value="ไม่มี">ไม่มี</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group input-group">
+                            <div style="flex:1;">
+                                <label class="form-label" for="edit_pet">รองรับสัตว์เลี้ยง</label>
+                                <select id="edit_pet" class="form-input">
+                                    <option value="มี">มี</option>
+                                    <option value="ไม่มี">ไม่มี</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;">
+                                <label class="form-label" for="edit_tent">สถานที่กางเต็นท์</label>
+                                <select id="edit_tent" class="form-input">
+                                    <option value="มี">มี</option>
+                                    <option value="ไม่มี">ไม่มี</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;">
+                                <label class="form-label" for="edit_toilet">สุขา (จำนวน)</label>
+                                <input type="text" id="edit_toilet" class="form-input" placeholder="จำนวนสุขา">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_parking">ที่จอดรถ (จำนวน)</label>
+                            <input type="text" id="edit_parking" class="form-input" placeholder="จำนวนที่จอดรถ">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_canSupport">รองรับผู้พักพิง (คน)</label>
+                            <input type="number" id="edit_canSupport" class="form-input" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_currentSupport">จำนวนผู้พักพิง (คน)</label>
+                            <input type="number" id="edit_currentSupport" class="form-input" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit_status">สถานะ *</label>
+                            <select id="edit_status" class="form-input" required>
+                                <option value="เปิด">เปิด</option>
+                                <option value="ปิด">ปิด</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" id="editMarkerBtn" class="btn-form"
+                            style="margin-top:20px; background: linear-gradient(135deg, #3b82f6, #60a5fa);">
+                            💾 บันทึกการแก้ไข
+                        </button>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>
