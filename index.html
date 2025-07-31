@@ -715,7 +715,7 @@
             <button onclick="closeCreateModal()" class="edit-modal-close">✕</button>
             <div class="edit-grid">
                 <div class="edit-form-section">
-                    <form id="createMarkerForm">
+                    <form id="createMarkerForm" onsubmit="event.preventDefault(); addMarkerWithData();">
                         <!-- คัดลอกฟอร์มจาก editModal เปลี่ยน id เป็น create_ ทั้งหมด -->
                         <div class="form-group">
                             <label class="form-label" for="create_shelterType">ประเภทศูนย์พักพิง *</label>
@@ -872,7 +872,7 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="btn-form"
+                        <button type="submit" id="addMarkerBtn" class="btn-form"
                             style="margin-top:20px; background: linear-gradient(135deg, #059669, #10b981);">
                             ➕ เพิ่มศูนย์พักพิงใหม่
                         </button>
@@ -1060,8 +1060,6 @@
                 updateStatus('❌ ไม่สามารถมาร์คตำแหน่งได้: ' + error.message, 5000);
             }
         }
-
-
 
         // ฟังก์ชันช่วยในการกำหนดระดับการซูมตามขนาดรัศมี (สำหรับ 10 กม. หรือภาพรวม)
         function getZoomLevelForRadius(radiusInMeters) {
@@ -1303,6 +1301,8 @@
                 markers.push(markerData);
                 updateMarkersList();
                 clearForm();
+                closeCreateModal();
+                loadMarkersFromFirebase();
                 updateStatus('✅ บันทึก "' + name + '" ใน Database สำเร็จ!', 5000);
 
                 addBtn.textContent = originalText;
@@ -1352,32 +1352,6 @@
             } catch (error) {
                 updateStatus('❌ เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message, 5000);
                 console.error('Error loading markers from Firebase:', error);
-            }
-        }
-
-        async function clearAllMarkers() {
-            try {
-                if (confirm('คุณแน่ใจหรือไม่ที่จะลบหมุดทั้งหมด? การดำเนินการนี้ไม่สามารถยกเลิกได้!')) {
-                    updateStatus('🗑️ กำลังลบหมุดทั้งหมด...', 0);
-                    const markersCol = window.collection(window.db, 'markers');
-                    const querySnapshot = await window.getDocs(markersCol);
-
-                    for (const docSnapshot of querySnapshot.docs) {
-                        await window.deleteDoc(window.doc(window.db, 'markers', docSnapshot.id));
-                    }
-                    // Remove all markers from the map and clear the local array
-                    markers.forEach(markerData => {
-                        if (markerData.marker) {
-                            map.Overlays.remove(markerData.marker);
-                        }
-                    });
-                    markers = [];
-                    updateMarkersList();
-                    updateStatus('✅ ลบหมุดทั้งหมดเรียบร้อยแล้ว!', 5000);
-                }
-            } catch (error) {
-                updateStatus('❌ เกิดข้อผิดพลาดในการลบหมุด: ' + error.message, 5000);
-                console.error('Error clearing all markers:', error);
             }
         }
 
@@ -1677,7 +1651,7 @@
         }
 
         var createMap; // ต้องประกาศ global เพื่อให้เข้าถึงได้
-        var createMarker; // ต้องประกาศ global เพื่อให้เข้าถึงได้
+        var createCurrentMarker; // ต้องประกาศ global เพื่อให้เข้าถึงได้
 
         // ฟังก์ชันสำหรับเริ่มต้นแผนที่ใน Create Modal
         // รับ initialLat และ initialLon เป็นพิกัดเริ่มต้น
@@ -1718,16 +1692,16 @@
                 createMap.location({ lon: initialLon, lat: initialLat }); // ตั้งค่าตำแหน่งเริ่มต้นตามพิกัดที่รับมา
 
                 // 5) วาง marker (เป็นหมุดกลาง)
-                createMarker = new longdo.Marker({ lon: initialLon, lat: initialLat }, {
+                createCurrentMarker = new longdo.Marker({ lon: initialLon, lat: initialLat }, {
                     title: 'ตำแหน่งศูนย์พักพิงใหม่',
                     detail: 'ลากแผนที่เพื่อย้ายหมุด หรือคลิกบนแผนที่เพื่อเลือกตำแหน่ง'
                 });
-                createMap.Overlays.add(createMarker);
+                createMap.Overlays.add(createCurrentMarker);
 
                 // 6) Event click เพื่อย้าย marker ไปยังจุดที่คลิก
                 createMap.Event.bind('click', function (overlay, location) {
-                    if (createMarker) {
-                        createMarker.Location({ lon: location.lon, lat: location.lat }); // ย้ายหมุดไปยังจุดที่คลิก
+                    if (createCurrentMarker) {
+                        createCurrentMarker.Location({ lon: location.lon, lat: location.lat }); // ย้ายหมุดไปยังจุดที่คลิก
                         document.getElementById('create_lat').value = location.lat.toFixed(6);
                         document.getElementById('create_lon').value = location.lon.toFixed(6);
                     }
@@ -1739,7 +1713,7 @@
                     // อัปเดตพิกัดในฟอร์มและย้ายหมุดตามศูนย์กลางแผนที่
                     document.getElementById('create_lat').value = center.lat.toFixed(6);
                     document.getElementById('create_lon').value = center.lon.toFixed(6);
-                    createMarker.location(center); // ย้ายหมุดตามศูนย์กลางแผนที่
+                    createCurrentMarker.location(center); // ย้ายหมุดตามศูนย์กลางแผนที่
                 });
 
                 console.log('Create map initialized successfully');
@@ -1797,8 +1771,8 @@
                 // ล้างแผนที่ใน createModal อย่างปลอดภัย (ถ้า initCreateMap ได้สร้างไว้)
                 if (typeof createMap !== 'undefined' && createMap !== null) {
                     try {
-                        if (typeof createMarker !== 'undefined' && createMarker !== null) {
-                            createMap.Overlays.remove(createMarker); // ลบหมุดชั่วคราวบนแผนที่สร้างใหม่
+                        if (typeof createCurrentMarker !== 'undefined' && createCurrentMarker !== null) {
+                            createMap.Overlays.remove(createCurrentMarker); // ลบหมุดชั่วคราวบนแผนที่สร้างใหม่
                         }
                         createMap.destroy(); // ทำลายอินสแตนซ์ของแผนที่
                     } catch (e) {
@@ -1806,7 +1780,7 @@
                     }
                     createMap = null; // ตั้งค่าให้เป็น null เพื่อให้สามารถสร้างใหม่ได้เมื่อเปิด Modal อีกครั้ง
                 }
-                createMarker = null; // ตั้งค่าหมุดชั่วคราวเป็น null
+                createCurrentMarker = null; // ตั้งค่าหมุดชั่วคราวเป็น null
 
                 updateStatus('✅ ปิดหน้าต่างเพิ่มศูนย์พักพิงใหม่แล้ว', 3000); // อัปเดตสถานะ
 
@@ -2147,62 +2121,10 @@
                         alert("เกิดข้อผิดพลาดในการอัปเดต: " + err.message);
                     }
                 });
-            } else if (createMarkerForm) {
-                createMarkerForm.addEventListener('submit', async function (event) {
-                    event.preventDefault(); // หยุดการโหลดหน้าซ้ำเมื่อกด Submit
-
-                    // 1. รวบรวมข้อมูลจากฟอร์ม
-                    const newShelterData = {
-                        shelterType: document.getElementById('create_shelterType').value,
-                        fullName: document.getElementById('create_fullName').value,
-                        phone: document.getElementById('create_phone').value,
-                        region: document.getElementById('create_region').value,
-                        province: document.getElementById('create_province').value,
-                        district: document.getElementById('create_district').value,
-                        subdistrict: document.getElementById('create_subdistrict').value,
-                        village: document.getElementById('create_village').value,
-                        zipcode: document.getElementById('create_zipcode').value,
-                        place: document.getElementById('create_place').value,
-                        lat: parseFloat(document.getElementById('create_lat').value),
-                        lon: parseFloat(document.getElementById('create_lon').value),
-                        electricity: document.getElementById('create_electricity').value,
-                        water: document.getElementById('create_water').value,
-                        wifi: document.getElementById('create_wifi').value,
-                        pet: document.getElementById('create_pet').value,
-                        tent: document.getElementById('create_tent').value,
-                        toilet: document.getElementById('create_toilet').value,
-                        parking: document.getElementById('create_parking').value,
-                        canSupport: parseInt(document.getElementById('create_canSupport').value) || 0,
-                        currentSupport: parseInt(document.getElementById('create_currentSupport').value) || 0,
-                        status: document.getElementById('create_status').value,
-                        createdAt: new Date() // เพิ่ม timestamp
-                    };
-
-                    // 2. ส่งข้อมูลไปยัง Firebase Firestore
-                    try {
-                        // 'db' และ 'collection' ถูกประกาศเป็น window global จาก script module แล้ว
-                        const docRef = await addDoc(collection(db, "markers"), newShelterData);
-                        console.log("Document written with ID: ", docRef.id);
-                        updateStatus('✅ เพิ่มศูนย์พักพิงใหม่สำเร็จ!', 5000);
-
-                        // 3. เคลียร์ฟอร์มและปิด Modal หลังจากบันทึกสำเร็จ
-                        createMarkerForm.reset();
-                        closeCreateModal();
-
-                        // 4. โหลดหมุดใหม่เพื่ออัปเดตบนแผนที่ (ถ้ามีฟังก์ชัน loadMarkersFromFirebase)
-                        if (typeof loadMarkersFromFirebase === 'function') {
-                            loadMarkersFromFirebase();
-                        }
-
-                    } catch (e) {
-                        console.error("Error adding document: ", e);
-                        updateStatus('❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + e.message, 5000);
-                    }
-                });
             } else {
-                console.error('editMarkerForm element not found');
+                console.error('element not found');
             }
-        });
+        })
 
         async function deleteMarkerFromPopup(markerId, index) {
             if (map && map.InfoWindow && typeof map.InfoWindow.close === 'function') {
@@ -2212,13 +2134,20 @@
         }
 
         function clearForm() {
-            document.getElementById('markerForm').reset();
-            document.getElementById('lat').value = '';
-            document.getElementById('lon').value = '';
-            document.getElementById('subdistrict').value = '';
-            document.getElementById('district').value = '';
-            document.getElementById('province').value = '';
-            document.getElementById('zipcode').value = '';
+            document.getElementById('createMarkerForm').reset();
+            document.getElementById('editMarkerForm').reset();
+            document.getElementById('create_lat').value = '';
+            document.getElementById('create_lon').value = '';
+            document.getElementById('create_subdistrict').value = '';
+            document.getElementById('create_district').value = '';
+            document.getElementById('create_province').value = '';
+            document.getElementById('create_zipcode').value = '';
+            document.getElementById('edit_lat').value = '';
+            document.getElementById('edit_lon').value = '';
+            document.getElementById('edit_subdistrict').value = '';
+            document.getElementById('edit_district').value = '';
+            document.getElementById('edit_province').value = '';
+            document.getElementById('edit_zipcode').value = '';
         }
 
         function updateStatus(message, duration = 0) {
