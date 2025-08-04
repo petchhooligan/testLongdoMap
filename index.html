@@ -1580,6 +1580,22 @@
             openEditModal(markerData, index);
         }
 
+        function waitForContainerReady(containerId, callback, tryCount = 0) {
+            const el = document.getElementById(containerId);
+            if (!el) {
+                console.error('ไม่พบ div #' + containerId);
+                return;
+            }
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 10 && rect.height > 10) {
+                callback();
+            } else if (tryCount < 10) {
+                setTimeout(() => waitForContainerReady(containerId, callback, tryCount + 1), 50);
+            } else {
+                console.error('Container #' + containerId + ' ไม่พร้อม (ขนาด 0x0 px)');
+            }
+        }
+
         // ฟังก์ชันสำหรับเปิด Create Modal
         function openCreateModal() {
             const createModal = document.getElementById('createModal');
@@ -1673,14 +1689,11 @@
                     return;
                 }
 
-                // 3) ทำลาย map เดิม (ถ้ามี) เพื่อสร้างใหม่
-                // นี่สำคัญมากถ้าเปิดปิด modal หลายครั้ง
-                if (createMap) {
-                    try {
-                        createMap.destroy();
-                    } catch (e) {
-                        console.warn('destroy create map เดิม error:', e);
-                    }
+                // ตรวจสอบว่า container มีขนาดที่เหมาะสม
+                if (createMapContainer.offsetWidth === 0 || createMapContainer.offsetHeight === 0) {
+                    console.warn('Edit map container has no dimensions, retrying...');
+                    setTimeout(() => initEditMap(lat, lon), 500);
+                    return;
                 }
 
                 // 4) สร้างแผนที่ใหม่
@@ -1689,41 +1702,52 @@
                     language: 'th',
                     zoom: 15 // ซูมในระดับที่เหมาะสมสำหรับการเลือกตำแหน่ง
                 });
-                createMap.location({ lon: initialLon, lat: initialLat }); // ตั้งค่าตำแหน่งเริ่มต้นตามพิกัดที่รับมา
 
-                // 5) วาง marker (เป็นหมุดกลาง)
-                createCurrentMarker = new longdo.Marker({ lon: initialLon, lat: initialLat }, {
-                    title: 'ตำแหน่งศูนย์พักพิงใหม่',
-                    detail: 'ลากแผนที่เพื่อย้ายหมุด หรือคลิกบนแผนที่เพื่อเลือกตำแหน่ง'
-                });
-                createMap.Overlays.add(createCurrentMarker);
+                setTimeout(() => {
+                    try {
+                        if (createMap && typeof createMap.location === 'function') {
+                            createMap.location({ lon: initialLon, lat: initialLat }); // ตั้งค่าตำแหน่งเริ่มต้นตามพิกัดที่รับมา
 
-                // 6) Event click เพื่อย้าย marker ไปยังจุดที่คลิก
-                createMap.Event.bind('click', function (overlay, location) {
-                    if (createCurrentMarker) {
-                        createCurrentMarker.Location({ lon: location.lon, lat: location.lat }); // ย้ายหมุดไปยังจุดที่คลิก
-                        document.getElementById('create_lat').value = location.lat.toFixed(6);
-                        document.getElementById('create_lon').value = location.lon.toFixed(6);
+                            // ลบ marker เดิมถ้ามี
+                            if (createCurrentMarker) {
+                                try {
+                                    createMap.Overlays.remove(createCurrentMarker);
+                                } catch (e) {
+                                    console.warn('Could not remove previous marker:', e);
+                                }
+                            }
+
+                            // 5) วาง marker (เป็นหมุดกลาง)
+                            createCurrentMarker = new longdo.Marker({ lon: initialLon, lat: initialLat }, {
+                                title: 'ตำแหน่งศูนย์พักพิงใหม่',
+                                detail: 'ลากแผนที่เพื่อย้ายหมุด หรือคลิกบนแผนที่เพื่อเลือกตำแหน่ง'
+                            });
+
+                            // 6) Event click เพื่อย้าย marker ไปยังจุดที่คลิก
+                            createMap.Event.bind('click', function (overlay, location) {
+                                if (createCurrentMarker) {
+                                    createCurrentMarker.Location({ lon: location.lon, lat: location.lat }); // ย้ายหมุดไปยังจุดที่คลิก
+                                    document.getElementById('create_lat').value = location.lat.toFixed(6);
+                                    document.getElementById('create_lon').value = location.lon.toFixed(6);
+                                }
+                            });
+
+                            console.log('Create map initialized successfully');
+                            updateStatus('✅ แผนที่พร้อมใช้งาน', 3000);
+                        }
+                    } catch (setupError) {
+                        console.error('Error setting up create map:', setupError);
+                        updateStatus('❌ เกิดข้อผิดพลาดในการตั้งค่าแผนที่', 3000);
                     }
-                });
-
-                // 7) Event location เพื่ออัปเดตพิกัดเมื่อแผนที่ถูกย้าย (ลากแผนที่)
-                createMap.Event.bind('location', function () {
-                    const center = createMap.location();
-                    // อัปเดตพิกัดในฟอร์มและย้ายหมุดตามศูนย์กลางแผนที่
-                    document.getElementById('create_lat').value = center.lat.toFixed(6);
-                    document.getElementById('create_lon').value = center.lon.toFixed(6);
-                    createCurrentMarker.location(center); // ย้ายหมุดตามศูนย์กลางแผนที่
-                });
-
-                console.log('Create map initialized successfully');
-
-                // อัปเดตพิกัดในฟอร์มเมื่อแผนที่เริ่มต้น
-                document.getElementById('create_lat').value = initialLat.toFixed(6);
-                document.getElementById('create_lon').value = initialLon.toFixed(6);
+                }, 500);
 
             } catch (error) {
                 console.error('Error initializing create map:', error);
+                updateStatus('❌ เกิดข้อผิดพลาดในการสร้างแผนที่', 3000);
+                setTimeout(() => {
+                    console.log('Retrying edit map initialization...');
+                    initEditMap(lat, lon);
+                }, 2000);
             }
         }
 
@@ -1853,56 +1877,87 @@
             try {
                 console.log('Initializing edit map at coordinates:', lat, lon);
 
-                // 1) ตรวจสอบว่า Longdo API โหลดเสร็จแล้ว
-                if (typeof longdo === 'undefined' || typeof longdo.Map === 'undefined') {
-                    console.warn('Longdo API ยังไม่พร้อม รอ 300ms แล้วลองใหม่');
-                    setTimeout(() => initEditMap(lat, lon), 300);
+                // ตรวจสอบว่า longdo API พร้อมใช้งาน
+                if (typeof longdo === 'undefined' || !longdo.Map) {
+                    console.error('Longdo Map API not loaded yet');
+                    setTimeout(() => initEditMap(lat, lon), 1000);
                     return;
                 }
 
-                // 2) ตรวจสอบว่า container พร้อม
                 const editMapContainer = document.getElementById('editMap');
                 if (!editMapContainer) {
-                    console.error('ไม่พบ div #editMap');
+                    console.error('Edit map container not found');
                     return;
                 }
 
-                // 3) ทำลาย map เดิม (ถ้ามี)
+                // ตรวจสอบว่า container มีขนาดที่เหมาะสม
+                if (editMapContainer.offsetWidth === 0 || editMapContainer.offsetHeight === 0) {
+                    console.warn('Edit map container has no dimensions, retrying...');
+                    setTimeout(() => initEditMap(lat, lon), 500);
+                    return;
+                }
+
+                // ลบแผนที่เก่าถ้ามี
                 if (editMap) {
                     try {
                         editMap.destroy();
                     } catch (e) {
-                        console.warn('destroy map เดิม error:', e);
+                        console.warn('Could not destroy previous edit map:', e);
                     }
+                    editMap = null;
                 }
 
-                // 4) สร้างแผนที่ใหม่
+                // สร้างแผนที่ใหม่
                 editMap = new longdo.Map({
                     placeholder: editMapContainer,
                     language: 'th',
                     zoom: 15
                 });
-                editMap.location({ lon, lat });
 
-                // 5) วาง marker
-                editCurrentMarker = new longdo.Marker({ lon, lat }, {
-                    title: 'ตำแหน่งปัจจุบัน',
-                    detail: 'คลิกเพื่อเลือกตำแหน่งใหม่'
-                });
-                editMap.Overlays.add(editCurrentMarker);
+                setTimeout(() => {
+                    try {
+                        if (editMap && typeof editMap.location === 'function') {
+                            editMap.location({ lon: lon, lat: lat });
+                            
 
-                // 6) event click เพื่อย้าย marker
-                editMap.Event.bind('click', function (overlay, location) {
-                    if (editCurrentMarker) {
-                        editCurrentMarker.Location({ lon: location.lon, lat: location.lat });
-                        document.getElementById('edit_lat').value = location.lat.toFixed(6);
-                        document.getElementById('edit_lon').value = location.lon.toFixed(6);
+                            // สร้าง marker ใหม่
+                            editCurrentMarker = new longdo.Marker({ lon: lon, lat: lat }, {
+                                title: 'ตำแหน่งปัจจุบัน',
+                                detail: 'คลิกเพื่อเลือกตำแหน่งใหม่'
+                            });
+
+                            // bind event click แบบใหม่
+                            editMap.Event.bind('click', function (location) {
+                                try {
+                                    if (editCurrentMarker && location) {
+                                        editCurrentMarker.location({ lon: location.lon, lat: location.lat });
+                                        const latInput = document.getElementById('edit_lat');
+                                        const lonInput = document.getElementById('edit_lon');
+                                        if (latInput) latInput.value = location.lat.toFixed(6);
+                                        if (lonInput) lonInput.value = location.lon.toFixed(6);
+                                        updateStatus(`📍 เลือกตำแหน่งใหม่: ${location.lat.toFixed(6)}, ${location.lon.toFixed(6)}`, 3000);
+                                    }
+                                } catch (clickError) {
+                                    console.error('Error handling map click:', clickError);
+                                }
+                            });
+
+                            console.log('Edit map initialized successfully');
+                            updateStatus('✅ แผนที่แก้ไขพร้อมใช้งาน', 3000);
+                        }
+                    } catch (setupError) {
+                        console.error('Error setting up edit map:', setupError);
+                        updateStatus('❌ เกิดข้อผิดพลาดในการตั้งค่าแผนที่แก้ไข', 3000);
                     }
-                });
+                }, 500);
 
-                console.log('Edit map initialized successfully');
             } catch (error) {
                 console.error('Error initializing edit map:', error);
+                updateStatus('❌ เกิดข้อผิดพลาดในการสร้างแผนที่แก้ไข', 3000);
+                setTimeout(() => {
+                    console.log('Retrying edit map initialization...');
+                    initEditMap(lat, lon);
+                }, 2000);
             }
         }
 
