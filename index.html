@@ -515,6 +515,38 @@
                 </button>
             </div>
 
+            <!-- 🔍 ฟิลเตอร์หมุด -->
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label">กรองหมุดศูนย์พักพิง</label>
+                <div class="input-group">
+                    <select id="filter_type" class="form-input">
+                        <option value="">ทุกประเภท</option>
+                        <option value="ตามแผน">ตามแผน</option>
+                        <option value="นอกแผน">นอกแผน</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                    <select id="filter_region" class="form-input">
+                        <option value="">ทุกภาค</option>
+                        <option value="เหนือ">เหนือ</option>
+                        <option value="กลาง">กลาง</option>
+                        <option value="ตะวันออกเฉียงเหนือ">ตะวันออกเฉียงเหนือ</option>
+                        <option value="ตะวันออก">ตะวันออก</option>
+                        <option value="ตะวันตก">ตะวันตก</option>
+                        <option value="ใต้">ใต้</option>
+                    </select>
+                    <input type="text" id="filter_province" class="form-input" placeholder="จังหวัด">
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <input type="text" id="filter_district" class="form-input" placeholder="อำเภอ">
+                    <input type="text" id="filter_subdistrict" class="form-input" placeholder="ตำบล">
+                </div>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button class="btn-secondary" onclick="applyFilter()">🔍 กรอง</button>
+                    <button class="btn-secondary" onclick="clearFilter()">❌ ล้าง</button>
+                </div>
+            </div>
+
+
             <div class="btn-group">
                 <button type="button" class="btn-secondary" onclick="loadMarkersFromFirebase()">
                     🔄 โหลดข้อมูล Database
@@ -945,8 +977,29 @@
                     language: 'th'
                 });
 
-                map.location({ lon: currentLon, lat: currentLat });
-                map.zoom(6);
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function (position) {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            map.zoom(6); // ซูมเข้าใกล้หน่อย
+                            map.location({ lon: lon, lat: lat });
+
+                            updateStatus('กำหนดตำแหน่งปัจจุบันแล้ว', 2000);
+                        },
+                        function (error) {
+                            console.error('ไม่สามารถดึงตำแหน่งที่ตั้งได้:', error);
+                            updateStatus('ไม่สามารถระบุตำแหน่งปัจจุบันได้', 5000);
+                            // fallback location ถ้ามี
+                            map.location({ lon: 100.5018, lat: 13.7563 }); // กรุงเทพฯ
+                            map.zoom(6);
+                        }
+                    );
+                } else {
+                    updateStatus('เบราว์เซอร์ไม่รองรับการระบุตำแหน่ง', 5000);
+                    map.location({ lon: 100.5018, lat: 13.7563 }); // fallback
+                    map.zoom(6);
+                }
 
                 map.Event.bind('location', updateCurrentCoordinate);
                 updateCurrentCoordinate();
@@ -1355,24 +1408,26 @@
             }
         }
 
-        function updateMarkersList() {
+        function updateMarkersList(filteredList = null) {
+            const data = filteredList || markers;
+
             var markersListDiv = document.getElementById('markersList');
             var markerCountSpan = document.getElementById('markerCount');
             markersListDiv.innerHTML = ''; // Clear current list
-            markerCountSpan.textContent = markers.length;
+            markerCountSpan.textContent = data.length;
 
             if (markers.length === 0) {
                 markersListDiv.innerHTML = `
                     <div class="empty-state">
-                        <p>ยังไม่มีหมุด</p>
-                        <p>เลื่อนแผนที่และเพิ่มหมุดแรก!</p>
+                        <p>ไม่พบหมุดตามเงื่อนไขที่กรอง</p>
+                        <p>หรือยังไม่มีหมุดในระบบ</p>
                     </div>
                 `;
                 return;
             }
 
             // Sort markers by creation timestamp (latest first)
-            const sortedMarkers = [...markers].sort((a, b) => b.timestamp - a.timestamp);
+            const sortedMarkers = [...data].sort((a, b) => b.timestamp - a.timestamp);
 
             sortedMarkers.forEach((markerData, index) => {
                 var markerItem = document.createElement('div');
@@ -2248,6 +2303,49 @@
                 window.open(googleMapsUrl, '_blank');
             }
         }
+
+        function applyFilter() {
+            const type = document.getElementById('filter_type').value.trim();
+            const region = document.getElementById('filter_region').value.trim();
+            const province = document.getElementById('filter_province').value.trim();
+            const district = document.getElementById('filter_district').value.trim();
+            const subdistrict = document.getElementById('filter_subdistrict').value.trim();
+
+            const filtered = markers.filter(m => {
+                return (!type || m.shelterType === type) &&
+                    (!region || m.region === region) &&
+                    (!province || (m.province || '').includes(province)) &&
+                    (!district || (m.district || '').includes(district)) &&
+                    (!subdistrict || (m.subdistrict || '').includes(subdistrict));
+            });
+
+            // ลบหมุดทั้งหมดออกจากแผนที่ก่อน
+            markers.forEach(m => {
+                if (m.marker) map.Overlays.remove(m.marker);
+            });
+
+            // แสดงเฉพาะหมุดที่ตรงกับ filter
+            filtered.forEach((m, index) => {
+                if (m.marker) map.Overlays.add(m.marker);
+            });
+
+            updateMarkersList(filtered);
+        }
+
+        function clearFilter() {
+            document.getElementById('filter_type').value = '';
+            document.getElementById('filter_region').value = '';
+            document.getElementById('filter_province').value = '';
+            document.getElementById('filter_district').value = '';
+            document.getElementById('filter_subdistrict').value = '';
+
+            // แสดงหมุดทั้งหมดในแผนที่
+            markers.forEach(m => {
+                if (m.marker) map.Overlays.add(m.marker);
+            });
+            updateMarkersList(); // โหลดทั้งหมด
+        }
+
 
 
 
