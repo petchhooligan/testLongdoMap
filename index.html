@@ -1798,7 +1798,8 @@
                         if (typeof createCurrentMarker !== 'undefined' && createCurrentMarker !== null) {
                             createMap.Overlays.remove(createCurrentMarker); // ลบหมุดชั่วคราวบนแผนที่สร้างใหม่
                         }
-                        createMap.destroy(); // ทำลายอินสแตนซ์ของแผนที่
+                        const container = document.getElementById('createMap');
+                        if (container) container.innerHTML = ''; // ทำลายอินสแตนซ์ของแผนที่
                     } catch (e) {
                         console.warn('Error destroying create map:', e);
                     }
@@ -1918,7 +1919,7 @@
                     try {
                         if (editMap && typeof editMap.location === 'function') {
                             editMap.location({ lon: lon, lat: lat });
-                            
+
 
                             // สร้าง marker ใหม่
                             editCurrentMarker = new longdo.Marker({ lon: lon, lat: lat }, {
@@ -2056,7 +2057,8 @@
                         if (editCurrentMarker) {
                             editMap.Overlays.remove(editCurrentMarker);
                         }
-                        editMap.destroy();
+                        const container = document.getElementById('editMap');
+                        if (container) container.innerHTML = ''; // ทำลายอินสแตนซ์ของแผนที่
                     } catch (e) {
                         console.warn('Error destroying edit map:', e);
                     }
