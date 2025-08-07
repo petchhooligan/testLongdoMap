@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครสมาชิกเจ้าหน้าที่</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        input::placeholder {
+            color: #999;
+        }
+
+        select {
+            cursor: pointer;
+            color: #333;
+        }
+
+        select option {
+            padding: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .role-dependent {
+            display: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .role-dependent.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>สมัครสมาชิก</h2>
+        
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        
+        <form onsubmit="register(event)">
+            <div class="form-group">
+                <input type="text" id="reg_username" placeholder="ชื่อผู้ใช้" required>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="reg_password" placeholder="รหัสผ่าน" required minlength="6">
+            </div>
+
+            <div class="form-group">
+                <select id="reg_role" required onchange="toggleLocationFields()">
+                    <option value="">-- เลือกระดับสิทธิ์ --</option>
+                    <option value="admin">แอดมิน</option>
+                    <option value="province">เจ้าหน้าที่ระดับจังหวัด</option>
+                    <option value="district">เจ้าหน้าที่ระดับอำเภอ</option>
+                    <option value="local">เจ้าหน้าที่ระดับตำบล</option>
+                </select>
+            </div>
+
+            <div id="locationFields" class="role-dependent">
+                <div class="form-group">
+                    <input type="text" id="reg_province" placeholder="จังหวัด">
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" id="reg_district" placeholder="อำเภอ">
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" id="reg_subdistrict" placeholder="ตำบล">
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">สมัครสมาชิก</button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>กำลังลงทะเบียน...</p>
+            </div>
+        </form>
+
+        <div class="login-link">
+            <p>มีบัญชีแล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRCO-wzB0sKIjGXw_IPJGSnjcw00ZBGME",
+            authDomain: "testlongdomap.firebaseapp.com",
+            projectId: "testlongdomap"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Toggle location fields based on role selection
+        window.toggleLocationFields = function() {
+            const role = document.getElementById("reg_role").value;
+            const locationFields = document.getElementById("locationFields");
+            
+            if (role && role !== "admin") {
+                locationFields.classList.add("show");
+                // Make fields required
+                document.getElementById("reg_province").required = true;
+                if (role === "district" || role === "local") {
+                    document.getElementById("reg_district").required = true;
+                }
+                if (role === "local") {
+                    document.getElementById("reg_subdistrict").required = true;
+                }
+            } else {
+                locationFields.classList.remove("show");
+                // Remove required attribute
+                document.getElementById("reg_province").required = false;
+                document.getElementById("reg_district").required = false;
+                document.getElementById("reg_subdistrict").required = false;
+            }
+        }
+
+        function showMessage(message, isError = false) {
+            const successDiv = document.getElementById("successMessage");
+            const errorDiv = document.getElementById("errorMessage");
+            
+            if (isError) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = "block";
+                successDiv.style.display = "none";
+            } else {
+                successDiv.textContent = message;
+                successDiv.style.display = "block";
+                errorDiv.style.display = "none";
+            }
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                successDiv.style.display = "none";
+                errorDiv.style.display = "none";
+            }, 5000);
+        }
+
+        function setLoading(isLoading) {
+            const submitBtn = document.getElementById("submitBtn");
+            const loading = document.getElementById("loading");
+            
+            if (isLoading) {
+                submitBtn.style.display = "none";
+                loading.style.display = "block";
+            } else {
+                submitBtn.style.display = "block";
+                loading.style.display = "none";
+            }
+        }
+
+        async function sha256(text) {
+            const msgBuffer = new TextEncoder().encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        window.register = async function(event) {
+            event.preventDefault();
+            
+            try {
+                setLoading(true);
+                
+                const username = document.getElementById("reg_username").value.trim();
+                const password = document.getElementById("reg_password").value;
+                const role = document.getElementById("reg_role").value;
+                const province = document.getElementById("reg_province").value.trim();
+                const district = document.getElementById("reg_district").value.trim();
+                const subdistrict = document.getElementById("reg_subdistrict").value.trim();
+
+                // Validate password length
+                if (password.length < 6) {
+                    showMessage("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร", true);
+                    return;
+                }
+
+                // Check if username already exists
+                const q = query(collection(db, "users"), where("username", "==", username));
+                const snapshot = await getDocs(q);
+                if (!snapshot.empty) {
+                    showMessage("ชื่อผู้ใช้นี้มีอยู่แล้ว กรุณาเลือกชื่อผู้ใช้อื่น", true);
+                    return;
+                }
+
+                const hashedPassword = await sha256(password);
+
+                await addDoc(collection(db, "users"), {
+                    username,
+                    password: hashedPassword,
+                    role,
+                    province,
+                    district,
+                    subdistrict,
+                    createdAt: new Date()
+                });
+
+                showMessage("✅ ลงทะเบียนสำเร็จ! กำลังนำไปหน้าเข้าสู่ระบบ...");
+                
+                // Redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
+
+            } catch (error) {
+                console.error("Registration error:", error);
+                showMessage("เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง", true);
+            } finally {
+                setLoading(false);
+            }
+        }
+    </script>
+</body>
+
+</html>
