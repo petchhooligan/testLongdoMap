@@ -570,13 +570,6 @@
                 </div>
             </div>
 
-
-            <div class="btn-group">
-                <button type="button" class="btn-secondary" onclick="loadMarkersFromFirebase()">
-                    🔄 โหลดข้อมูล Database
-                </button>
-            </div>
-
             <div class="markers-list">
                 <h3>📌 หมุดทั้งหมด (<span id="markerCount">0</span>)</h3>
                 <div id="markersList">
@@ -1856,6 +1849,12 @@
 
         // ฟังก์ชันสำหรับเปิด Create Modal
         function openCreateModal() {
+            // ✅ เช็คสิทธิ์ก่อน
+            const role = localStorage.getItem("userRole");
+            if (role !== 'admin' && role !== 'province') {
+                alert("⛔ คุณไม่มีสิทธิ์เพิ่มศูนย์พักพิง");
+                return; // จบฟังก์ชันทันที ไม่ให้ popup เด้ง
+            }
             const createModal = document.getElementById('createModal');
             createModal.classList.add('edit-modal');
             createModal.style.display = 'flex'; // แสดง modal
