@@ -480,6 +480,19 @@
                 height: 250px;
             }
         }
+
+        .capacity-bar-container {
+            background: #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 16px;
+            margin-top: 10px;
+        }
+
+        .capacity-bar {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
     </style>
     <script type="text/javascript" src="https://api.longdo.com/map3/?key=417740672e7626cdcd09c2756d411dde"></script>
 </head>
@@ -979,6 +992,8 @@
         var statusTimeout;
         var editingIndex = null;
         var editingMarkerData = null;
+        var capacityBars = []; // เก็บ capacity bar overlays
+
 
         function init() {
             try {
@@ -1218,107 +1233,201 @@
             }
         }
 
+        // Fixed version using longdo.Marker with custom HTML
+        function createCapacityBar(lat, lon, currentSupport, capacity) {
+            if (!capacity || currentSupport == null) return;
+
+            const percent = Math.min((currentSupport / capacity) * 100, 100);
+
+            let color = '#10b981'; // เขียว
+            if (percent >= 80) color = '#ef4444'; // แดง
+            else if (percent >= 50) color = '#facc15'; // เหลือง
+
+            // Create HTML string for the capacity bar
+            const barHtml = `
+        <div style="
+            position: relative;
+            transform: translate(-50%, 10px);
+            width: 60px;
+            height: 8px;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        ">
+            <div style="
+                width: ${percent}%;
+                height: 100%;
+                background: ${color};
+                transition: width 0.5s;
+            "></div>
+        </div>
+    `;
+
+            // Create marker with custom HTML icon
+            const barMarker = new longdo.Marker(
+                { lon: lon, lat: lat },
+                {
+                    icon: {
+                        html: barHtml,
+                        offset: { x: 30, y: -4 } // Center the bar
+                    },
+                    weight: longdo.OverlayWeight.Bottom // Ensure it appears below other markers
+                }
+            );
+
+            map.Overlays.add(barMarker);
+            return barMarker;
+        }
+
+        // Alternative version using simple overlay approach
+        function createCapacityBarAlternative(lat, lon, currentSupport, capacity) {
+            if (!capacity || currentSupport == null) return;
+
+            const percent = Math.min((currentSupport / capacity) * 100, 100);
+
+            let color = '#10b981'; // เขียว
+            if (percent >= 80) color = '#ef4444'; // แดง
+            else if (percent >= 50) color = '#facc15'; // เหลือง
+
+            // Try using longdo.Overlay if it exists
+            if (typeof longdo.Overlay !== 'undefined') {
+                const div = document.createElement('div');
+                div.style.position = 'relative';
+                div.style.transform = 'translate(-50%, 10px)';
+                div.style.width = '60px';
+                div.style.height = '8px';
+                div.style.background = '#ffffff';
+                div.style.border = '1px solid #ccc';
+                div.style.borderRadius = '4px';
+                div.style.overflow = 'hidden';
+                div.style.boxShadow = '0 1px 4px rgba(0,0,0,0.2)';
+
+                const fill = document.createElement('div');
+                fill.style.width = percent + '%';
+                fill.style.height = '100%';
+                fill.style.background = color;
+                fill.style.transition = 'width 0.5s';
+
+                div.appendChild(fill);
+
+                const overlay = new longdo.Overlay(
+                    { location: { lon, lat } },
+                    {
+                        element: div,
+                        offset: { x: 0, y: 20 }
+                    }
+                );
+
+                map.Overlays.add(overlay);
+                return overlay;
+            } else {
+                // Fallback to marker approach
+                return createCapacityBar(lat, lon, currentSupport, capacity);
+            }
+        }
+
+        function clearCapacityBars() {
+            capacityBars.forEach(bar => {
+                try {
+                    map.Overlays.remove(bar);
+                } catch (e) {
+                    console.warn("ไม่สามารถลบ capacity bar:", e);
+                }
+            });
+            capacityBars = [];
+        }
+
+
+        // Enhanced createMarker function with better error handling
         function createMarker(lat, lon, name, address, active, capacity, markerId, markerIndex, extraData = {}) {
+            const percent = (extraData.capacity && extraData.currentSupport != null)
+                ? Math.min((extraData.currentSupport / extraData.capacity) * 100, 100)
+                : 0;
+
+            const barColor = percent < 50
+                ? '#10b981'
+                : percent < 80
+                    ? '#facc15'
+                    : '#ef4444';
+
             let detail = `
-                <div style="padding: 10px; font-size: 14px; line-height: 1.6;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        ${extraData.shelterType ? `<tr><td style="padding: 4px 0; vertical-align: top; width: 35%;">🏢 <b>ประเภทศูนย์:</b></td><td style="padding: 4px 0; vertical-align: top; width: 65%;">${extraData.shelterType}</td></tr>` : ''}
-                        ${name ? `<tr><td style="padding: 4px 0; vertical-align: top;">👤 <b>ชื่อ-สกุล:</b></td><td style="padding: 4px 0; vertical-align: top;">${name}</td></tr>` : ''}
-                        ${extraData.phone ? `<tr><td style="padding: 4px 0; vertical-align: top;">📞 <b>โทร:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.phone}</td></tr>` : ''}
-                        ${extraData.region ? `<tr><td style="padding: 4px 0; vertical-align: top;">🗺️ <b>ภาค:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.region}</td></tr>` : ''}
-                        ${extraData.province ? `<tr><td style="padding: 4px 0; vertical-align: top;"><b>จังหวัด:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.province}</td></tr>` : ''}
-                        ${extraData.district ? `<tr><td style="padding: 4px 0; vertical-align: top;"><b>อำเภอ:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.district}</td></tr>` : ''}
-                        ${extraData.subdistrict ? `<tr><td style="padding: 4px 0; vertical-align: top;"><b>ตำบล:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.subdistrict}</td></tr>` : ''}
-                        ${extraData.village ? `<tr><td style="padding: 4px 0; vertical-align: top;"><b>หมู่บ้าน:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.village}</td></tr>` : ''}
-                        ${extraData.zipcode ? `<tr><td style="padding: 4px 0; vertical-align: top;"><b>รหัสไปรษณีย์:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.zipcode}</td></tr>` : ''}
-                        ${address ? `<tr><td style="padding: 4px 0; vertical-align: top;">📍 <b>สถานที่:</b></td><td style="padding: 4px 0; vertical-align: top;">${address}</td></tr>` : ''}
-                        <tr><td style="padding: 4px 0; vertical-align: top;">🌍 <b>พิกัด:</b></td><td style="padding: 4px 0; vertical-align: top;">${lat.toFixed(6)}, ${lon.toFixed(6)}</td></tr>
-                        ${capacity !== null && capacity !== undefined ? `<tr><td style="padding: 4px 0; vertical-align: top;">👥 <b>รองรับ:</b></td><td style="padding: 4px 0; vertical-align: top;">${capacity.toLocaleString()} คน</td></tr>` : ''}
-                        ${extraData.currentSupport !== null && extraData.currentSupport !== undefined ? `<tr><td style="padding: 4px 0; vertical-align: top;">👤 <b>ผู้พักพิง:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.currentSupport} คน</td></tr>` : ''}
-                        ${extraData.parking ? `<tr><td style="padding: 4px 0; vertical-align: top;">🚗 <b>ที่จอดรถ:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.parking} คัน</td></tr>` : ''}
-                        ${extraData.toilet ? `<tr><td style="padding: 4px 0; vertical-align: top;">🚻 <b>สุขา:</b></td><td style="padding: 4px 0; vertical-align: top;">${extraData.toilet}</td></tr>` : ''}
-                    </table>
-                    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
-                        ${extraData.electricity === 'มี' ? `<span style="background: #e0f7fa; color: #00796b; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">⚡ ไฟฟ้า</span>` : ''}
-                        ${extraData.water === 'มี' ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">💧 ประปา</span>` : ''}
-                        ${extraData.wifi === 'มี' ? `<span style="background: #ede7f6; color: #4527a0; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">📶 Wifi</span>` : ''}
-                        ${extraData.pet === 'มี' ? `<span style="background: #ffe0b2; color: #e65100; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">🐶 รองรับสัตว์เลี้ยง</span>` : ''}
-                        ${extraData.tent === 'มี' ? `<span style="background: #c8e6c9; color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block;">⛺ กางเต็นท์</span>` : ''}
-                    </div>
-                </div>
-            `;
-            // เพิ่ม toggle เปิด/ปิด
+        <div style="padding: 10px; font-size: 14px; line-height: 1.6;">
+            <table style="width: 100%; border-collapse: collapse;">
+                ${extraData.shelterType ? `<tr><td style="padding: 4px 0;">🏢 <b>ประเภทศูนย์:</b></td><td>${extraData.shelterType}</td></tr>` : ''}
+                ${name ? `<tr><td style="padding: 4px 0;">👤 <b>ชื่อ-สกุล:</b></td><td>${name}</td></tr>` : ''}
+                ${extraData.phone ? `<tr><td style="padding: 4px 0;">📞 <b>โทร:</b></td><td>${extraData.phone}</td></tr>` : ''}
+                ${extraData.region ? `<tr><td style="padding: 4px 0;">🗺️ <b>ภาค:</b></td><td>${extraData.region}</td></tr>` : ''}
+                ${extraData.province ? `<tr><td style="padding: 4px 0;"><b>จังหวัด:</b></td><td>${extraData.province}</td></tr>` : ''}
+                ${extraData.district ? `<tr><td style="padding: 4px 0;"><b>อำเภอ:</b></td><td>${extraData.district}</td></tr>` : ''}
+                ${extraData.subdistrict ? `<tr><td style="padding: 4px 0;"><b>ตำบล:</b></td><td>${extraData.subdistrict}</td></tr>` : ''}
+                ${extraData.village ? `<tr><td style="padding: 4px 0;"><b>หมู่บ้าน:</b></td><td>${extraData.village}</td></tr>` : ''}
+                ${extraData.zipcode ? `<tr><td style="padding: 4px 0;"><b>รหัสไปรษณีย์:</b></td><td>${extraData.zipcode}</td></tr>` : ''}
+                ${address ? `<tr><td style="padding: 4px 0;">📍 <b>สถานที่:</b></td><td>${address}</td></tr>` : ''}
+                <tr><td style="padding: 4px 0;">🌍 <b>พิกัด:</b></td><td>${lat.toFixed(6)}, ${lon.toFixed(6)}</td></tr>
+                ${capacity != null ? `<tr><td style="padding: 4px 0;">👥 <b>รองรับ:</b></td><td>${capacity.toLocaleString()} คน</td></tr>` : ''}
+                ${extraData.currentSupport != null ? `<tr><td style="padding: 4px 0;">👤 <b>ผู้พักพิง:</b></td><td>${extraData.currentSupport} คน</td></tr>` : ''}
+                ${extraData.parking ? `<tr><td style="padding: 4px 0;">🚗 <b>ที่จอดรถ:</b></td><td>${extraData.parking} คัน</td></tr>` : ''}
+                ${extraData.toilet ? `<tr><td style="padding: 4px 0;">🚻 <b>สุขา:</b></td><td>${extraData.toilet}</td></tr>` : ''}
+            </table>
+
+            <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+                ${extraData.electricity === 'มี' ? `<span style="background: #e0f7fa; color: #00796b; padding: 4px 8px; border-radius: 4px; font-size: 12px;">⚡ ไฟฟ้า</span>` : ''}
+                ${extraData.water === 'มี' ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 12px;">💧 ประปา</span>` : ''}
+                ${extraData.wifi === 'มี' ? `<span style="background: #ede7f6; color: #4527a0; padding: 4px 8px; border-radius: 4px; font-size: 12px;">📶 Wifi</span>` : ''}
+                ${extraData.pet === 'มี' ? `<span style="background: #ffe0b2; color: #e65100; padding: 4px 8px; border-radius: 4px; font-size: 12px;">🐶 รองรับสัตว์เลี้ยง</span>` : ''}
+                ${extraData.tent === 'มี' ? `<span style="background: #c8e6c9; color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-size: 12px;">⛺ กางเต็นท์</span>` : ''}
+            </div>
+        </div>
+    `;
+
             if (typeof markerId !== 'undefined' && typeof markerIndex !== 'undefined') {
                 detail += `
-                    <div style='margin:12px 0;'>
-                        <label class="switch">
-                            <input type="checkbox" ${active ? 'checked' : ''} onchange="toggleActive('${markerId}', ${markerIndex}, this.checked)">
-                            <span class="slider"></span>
-                        </label>
-                        <span style='margin-left:8px; vertical-align: middle; font-weight: 600; color: ${active ? '#10b981' : '#dc2626'};'>${active ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</span>
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
-                        ${canEdit(extraData) ? `
-                        <button onclick="editMarkerFromPopup('${markerId}', ${markerIndex})" style="background:#3b82f6;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;flex:1;min-width:100px;font-size:13px;font-weight:600;">✏️ แก้ไข</button>
-                        ` : ''}
-                        ${canDelete(extraData) ? `
-                        <button onclick="deleteMarkerFromPopup('${markerId}', ${markerIndex})" style="background:#ef4444;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;flex:1;min-width:100px;font-size:13px;font-weight:600;">🗑️ ลบหมุดนี้</button>
-                        ` : ''}
-                         <button onclick="getDirections(${lat}, ${lon})" style="background:#10b981;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;flex:1;min-width:100px;font-size:13px;font-weight:600;">🗺️ เส้นทาง</button>
-                    </div>
-                </div>
-                `;
+            <div style='margin:12px 0;'>
+                <label class="switch">
+                    <input type="checkbox" ${active ? 'checked' : ''} onchange="toggleActive('${markerId}', ${markerIndex}, this.checked)">
+                    <span class="slider"></span>
+                </label>
+                <span style='margin-left:8px; font-weight: 600; color: ${active ? '#10b981' : '#dc2626'};'>${active ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                ${canEdit(extraData) ? `<button onclick="editMarkerFromPopup('${markerId}', ${markerIndex})" style="background:#3b82f6;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;flex:1;min-width:100px;">✏️ แก้ไข</button>` : ''}
+                ${canDelete(extraData) ? `<button onclick="deleteMarkerFromPopup('${markerId}', ${markerIndex})" style="background:#ef4444;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;flex:1;min-width:100px;">🗑️ ลบหมุดนี้</button>` : ''}
+                <button onclick="getDirections(${lat}, ${lon})" style="background:#10b981;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;flex:1;min-width:100px;">🗺️ เส้นทาง</button>
+            </div>
+        `;
             }
 
             const markerOptions = {
                 title: name,
                 detail: detail,
-                // กำหนดขนาดของ Popup โดยตรง
-                size: { width: 450, height: 'auto' } // กำหนด width เป็น 450px, height เป็น auto
+                size: { width: 450, height: 'auto' },
+                icon: {
+                    url: active ? 'greenMarker.png' : 'redMarker.png',
+                    offset: { x: 0, y: -18 },
+                    size: { w: 32, h: 32 }
+                }
             };
 
-            if (active) {
-                markerOptions.icon = { url: 'greenMarker.png', offset: { x: 0, y: -18 }, size: { w: 32, h: 32 } };
-            } else {
-                markerOptions.icon = {
-                    url: 'redMarker.png', // สมมติว่าคุณมีไอคอนสีแดงสำหรับสถานะ 'ปิด'
-                    offset: { x: 0, y: -18 }, size: { w: 32, h: 32 }
-                };
-            }
+            const marker = new longdo.Marker({ lon: lon, lat: lat }, markerOptions);
 
-            const marker = new longdo.Marker(
-                { lon: lon, lat: lat },
-                markerOptions
-            );
-
-            // เพิ่ม event hover เพื่อแสดง/ปิดป๊อปอัพ
             if (marker && marker.Event && typeof marker.Event.bind === 'function') {
                 marker.Event.bind('OverlayHover', function () {
-                    // console.log('OverlayHover fired for marker:', name, 'ID:', markerId);
-                    if (infoWindowCloseTimeout) {
-                        clearTimeout(infoWindowCloseTimeout);
-                        infoWindowCloseTimeout = null;
-                    }
+                    if (infoWindowCloseTimeout) clearTimeout(infoWindowCloseTimeout);
                     map.InfoWindow.open(marker);
                 });
 
                 marker.Event.bind('OverlayLeave', function () {
-                    // console.log('OverlayLeave fired for marker:', name, 'ID:', markerId);
-                    if (infoWindowCloseTimeout) {
-                        clearTimeout(infoWindowCloseTimeout);
-                    }
-                    infoWindowCloseTimeout = setTimeout(() => {
-                        map.InfoWindow.close();
-                    }, 300);
+                    if (infoWindowCloseTimeout) clearTimeout(infoWindowCloseTimeout);
+                    infoWindowCloseTimeout = setTimeout(() => map.InfoWindow.close(), 300);
                 });
 
-                // ทิ้ง Event 'click' ไว้เพื่อเปรียบเทียบว่ายังทำงานปกติหรือไม่
                 marker.Event.bind('click', function () {
-                    // console.log('Click event fired for marker:', name, 'ID:', markerId);
                     map.InfoWindow.open(marker);
                 });
             }
+
             return marker;
         }
 
@@ -1394,6 +1503,8 @@
                 // Add marker to map
                 var marker = createMarker(markerData.lat, markerData.lon, name, place, false, markerData.capacity, docRef.id, markers.length, markerData); // ใช้ docRef.id ที่ถูกต้อง
                 map.Overlays.add(marker);
+                const bar = createCapacityBar(markerData.lat, markerData.lon, markerData.currentSupport, markerData.capacity);
+                if (bar) capacityBars.push(bar);
 
                 markerData.id = docRef.id;
                 markerData.marker = marker;
@@ -1438,6 +1549,8 @@
                         const data = doc.data();
                         const marker = createMarker(data.lat, data.lon, data.name, data.address, data.active, data.capacity, doc.id, markers.length, data);
                         map.Overlays.add(marker);
+                        const bar = createCapacityBar(data.lat, data.lon, data.currentSupport, data.capacity);
+                        if (bar) capacityBars.push(bar);
 
                         // Store marker with its ID and original data
                         markers.push({
@@ -1457,6 +1570,8 @@
 
         function updateMarkersList(filteredList = null) {
             const data = filteredList || markers;
+
+            clearCapacityBars();
 
             var markersListDiv = document.getElementById('markersList');
             var markerCountSpan = document.getElementById('markerCount');
@@ -1516,6 +1631,8 @@
                     </div>
                 `;
                 markersListDiv.appendChild(markerItem);
+                const bar = createCapacityBar(markerData.lat, markerData.lon, markerData.currentSupport, markerData.capacity);
+                if (bar) capacityBars.push(bar);
             });
         }
 
@@ -2414,6 +2531,16 @@
             filtered.forEach((m, index) => {
                 if (m.marker) map.Overlays.add(m.marker);
             });
+
+            clearCapacityBars(); // ลบ capacity bar เดิม
+
+            filtered.forEach((markerData) => {
+                if (markerData.capacity && markerData.currentSupport != null) {
+                    const bar = createCapacityBar(markerData.lat, markerData.lon, markerData.currentSupport, markerData.capacity);
+                    if (bar) capacityBars.push(bar);
+                }
+            });
+
 
             updateMarkersList(filtered);
         }
